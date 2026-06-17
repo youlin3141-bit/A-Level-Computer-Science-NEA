@@ -1,45 +1,72 @@
 import pygame
 import pygame_gui
 
-
-main_bg=pygame.image.load('main_bg.png')
-manager = pygame_gui.UIManager((800, 600))# the "boss" of the GUI components
-
-def title_page():
-    play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 200), (200, 50)),  # rectangle shape
+class MainMenu:
+    def __init__(self):
+        self.manager=pygame_gui.UIManager((800,600))
+        self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 200), (200, 50)),  # rectangle shape
                                                     text='Play',
-                                                    manager=manager)  # button created
-    leaderboard_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300,275), (200, 50)),  # rectangle shape
-                                                    text='Leaderboard',
-                                                    manager=manager)  # button created
-
-    title = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((300, 100), (200, 50)),
-            text="Title Text",
-            manager=manager
-        )
-    exit_button = pygame_gui.elements.UIButton(
-        relative_rect=pygame.Rect((350,400), (100, 50)),
-        text="Exit",
-        manager=manager)
-    buttons=[play_button,leaderboard_button,exit_button,title]
-    return buttons
-title_buttons=title_page()
-
-def leaderboard(window):
-    global title_buttons
-    window.blit(main_bg,(0,0))
-    title = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((300, 100), (200, 50)),
+                                                    manager=self.manager)
+        self.leaderboard_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((300, 275), (200, 50)),
             text="Leaderboard",
-            manager=manager
+            manager=self.manager,
+        )
+        self.exit_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((350, 400), (100, 50)),
+            text="Exit",
+            manager=self.manager,
+        )
+    def update(self,time_delta, window):
+        window.blit(main_bg, (0, 0))
+        window.blit(logo, (190, 0))
+        self.manager.update(time_delta)
+        self.manager.draw_ui(window)
+
+    def handle_event(self,event):
+        import main
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element ==self.play_button:
+                print(f"game starting")
+            if event.ui_element ==self.leaderboard_button:
+                main.update_screen(1)
+            if event.ui_element ==self.exit_button:
+                main.pygame.quit()
+        self.manager.process_events(event)
+
+class Leaderboard:
+    def __init__(self):
+        self.manager = pygame_gui.UIManager((800, 600))
+        self.slider = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 200), (200, 50)),
+                                                        # rectangle shape
+                                                        text='WOrk IN Progress',
+                                                        manager=self.manager)
+        self.back_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((350, 400), (100, 50)),
+            text="Back",
+            manager=self.manager,
         )
 
+    def update(self, time_delta, window):
+        window.blit(main_bg, (0, 0))
+        window.blit(logo, (190, 0))
+        self.manager.update(time_delta)
+        self.manager.draw_ui(window)
 
 
-def update(time_delta,window):
-    manager.update(time_delta)
-    manager.draw_ui(window)
+    def handle_event(self, event):
+        import main
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.slider:
+                print(f"NUmber 1 is ME")
+            if event.ui_element == self.back_button:
+                main.update_screen(0)
+        self.manager.process_events(event)
+main_menu = MainMenu()
+leaderboard = Leaderboard()
+main_bg=pygame.image.load('main_bg.png')
+logo=pygame.image.load('testlogo.png')
+
 
 
 
