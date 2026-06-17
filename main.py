@@ -8,14 +8,20 @@ clock = pygame.time.Clock()
 
 import menu
 manager=menu.manager
+current_page="Main Menu"
 window.blit(menu.main_bg,(0,0))
-menu.title_page()
 def handle_event(event):
+    global running, current_page
     if event.type == pygame_gui.UI_BUTTON_PRESSED:
         if event.ui_element == menu.title_buttons[0]:
             print(f"game start")
         if event.ui_element ==menu.title_buttons[1]:
+            current_page="Leaderboard"
+            for button in menu.title_buttons:
+                button.hide()
             menu.leaderboard(window)
+        if event.ui_element ==menu.title_buttons[2]:
+            running = False
     manager.process_events(event)  # processes the event
 
 while running:
