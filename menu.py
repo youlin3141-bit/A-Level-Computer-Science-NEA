@@ -3,9 +3,12 @@ import pygame_gui
 
 class MainMenu:
     def __init__(self):
-        self.manager=pygame_gui.UIManager((800,600))
-        self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 200), (200, 50)),  # rectangle shape
-                                                    text='Play',
+        """
+        Creates Buttons and Text for Title Screen
+        """
+        self.manager=pygame_gui.UIManager((800,600))#manager for title screen
+        self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 200), (200, 50)),
+                                                    text='Play',#
                                                     manager=self.manager)
         self.leaderboard_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((300, 275), (200, 50)),
@@ -18,6 +21,7 @@ class MainMenu:
             manager=self.manager,
         )
     def update(self,time_delta, window):
+        """Update method for the title screen"""
         window.blit(main_bg, (0, 0))
         window.blit(logo, (190, 0))
         self.manager.update(time_delta)

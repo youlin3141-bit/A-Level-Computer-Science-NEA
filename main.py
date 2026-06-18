@@ -12,6 +12,7 @@ screens=[menu.main_menu,menu.leaderboard]
 active_screen=screens[0]
 
 def update_screen(index):
+    """updates screen to given index"""
     global active_screen
     active_screen=screens[index]
 
@@ -23,3 +24,4 @@ while True:
         active_screen.handle_event(event)
     active_screen.update(time_delta,window)
     pygame.display.update()
+pygame.quit()#why does it make an error?
