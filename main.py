@@ -1,4 +1,7 @@
 import pygame # user venv 3.14 computerscience nea
+
+from menu import login_page
+
 pygame.init()
 window = pygame.display.set_mode((800, 600))#create window 800x600
 
@@ -8,7 +11,7 @@ clock = pygame.time.Clock()
 import menu
 current_page="Main Menu"
 
-screens=[menu.main_menu,menu.leaderboard]
+screens=[menu.main_menu , menu.leaderboard , menu.login_page]
 active_screen=screens[0]
 
 def update_screen(index):

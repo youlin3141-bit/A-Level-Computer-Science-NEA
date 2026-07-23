@@ -1,48 +1,11 @@
 import pygame
+pygame.init()
 import pygame_gui
-
-class MainMenu:
-    def __init__(self):
-        self.manager=pygame_gui.UIManager((800,600))
-        self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 200), (200, 50)),  # rectangle shape
-                                                    text='Play',
-                                                    manager=self.manager)
-        self.leaderboard_button = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((300, 275), (200, 50)),
-            text="Leaderboard",
-            manager=self.manager,
-        )
-        self.exit_button = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((350, 400), (100, 50)),
-            text="Exit",
-            manager=self.manager,
-        )
-    def update(self,time_delta, window):
-        window.blit(main_bg, (0, 0))
-        window.blit(logo, (190, 0))
-        self.manager.update(time_delta)
-        self.manager.draw_ui(window)
-
-    def handle_event(self,event):
-        import main
-        if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            if event.ui_element ==self.play_button:
-                print(f"game starting")
-            if event.ui_element ==self.leaderboard_button:
-                main.update_screen(1)
-            if event.ui_element ==self.exit_button:
-                main.pygame.quit()
-        self.manager.process_events(event)
-
-class Leaderboard:
+class Page:
     def __init__(self):
         self.manager = pygame_gui.UIManager((800, 600))
-        self.slider = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 200), (200, 50)),
-                                                        # rectangle shape
-                                                        text='WOrk IN Progress',
-                                                        manager=self.manager)
         self.back_button = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((350, 400), (100, 50)),
+            relative_rect=pygame.Rect((350, 500), (100, 50)),
             text="Back",
             manager=self.manager,
         )
@@ -53,6 +16,37 @@ class Leaderboard:
         self.manager.update(time_delta)
         self.manager.draw_ui(window)
 
+class MainMenu(Page):
+    def __init__(self):
+        super().__init__()
+        self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 200), (200, 50)),  # rectangle shape
+                                                    text='Play',
+                                                    manager=self.manager)
+        self.leaderboard_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((300, 275), (200, 50)),
+            text="Leaderboard",
+            manager=self.manager,
+        )
+        self.back_button.set_text("Exit")
+
+    def handle_event(self,event):
+        import main
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element ==self.play_button:
+                main.update_screen(2)
+            if event.ui_element ==self.leaderboard_button:
+                main.update_screen(1)
+            if event.ui_element ==self.back_button:
+                main.pygame.quit()
+        self.manager.process_events(event)
+
+class Leaderboard(Page):
+    def __init__(self):
+        super().__init__()
+        self.slider = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 200), (200, 50)),
+                                                        # rectangle shape
+                                                        text='WOrk IN Progress',
+                                                        manager=self.manager)
 
     def handle_event(self, event):
         import main
@@ -62,10 +56,41 @@ class Leaderboard:
             if event.ui_element == self.back_button:
                 main.update_screen(0)
         self.manager.process_events(event)
+
+class LoginPage(Page):
+    def __init__(self):
+        super().__init__()
+        self.enter = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((325, 425), (150, 50)),
+                                                        # rectangle shape
+                                                        text='Enter',
+                                                        manager=self.manager)
+        self.username_box = pygame_gui.elements.UITextEntryLine(
+            relative_rect=pygame.Rect((250, 200), (300, 50)),
+            placeholder_text="Enter Username",
+            manager=self.manager
+        )
+
+        self.password_box = pygame_gui.elements.UITextEntryLine(
+            relative_rect=pygame.Rect((250, 250), (300, 50)),
+            placeholder_text="Enter Password",
+            manager=self.manager
+        )
+        self.password_box.set_text_hidden(True)
+    def handle_event(self, event):
+        import main
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.enter:
+                self.username_box.set_text("")
+                self.password_box.set_text("")
+                print(f"No account matches these credentials")
+            if event.ui_element == self.back_button:
+                main.update_screen(0)
+        self.manager.process_events(event)
 main_menu = MainMenu()
 leaderboard = Leaderboard()
+login_page = LoginPage()
 main_bg=pygame.image.load('main_bg.png')
-logo=pygame.image.load('testlogo.png')
+logo=pygame.image.load('testpic.png')
 
 
 
