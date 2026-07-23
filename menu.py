@@ -1,5 +1,5 @@
 import pygame
-pygame.init()
+pygame.init()#
 import pygame_gui
 class Page:
     def __init__(self):
