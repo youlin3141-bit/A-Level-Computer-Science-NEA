@@ -1,6 +1,7 @@
 import pygame
-pygame.init()
+# pygame.init()
 import pygame_gui
+running=True
 class Page:
     def __init__(self):
         self.manager = pygame_gui.UIManager((800, 600))
@@ -30,14 +31,14 @@ class MainMenu(Page):
         self.back_button.set_text("Exit")
 
     def handle_event(self,event):
-        import main
+        global running
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element ==self.play_button:
-                main.update_screen(2)
+                update_screen(2)
             if event.ui_element ==self.leaderboard_button:
-                main.update_screen(1)
-            if event.ui_element ==self.back_button:
-                main.pygame.quit()
+                update_screen(1)
+            if event.ui_element ==self.back_button:#
+                running=False
         self.manager.process_events(event)
 
 class Leaderboard(Page):
@@ -49,12 +50,12 @@ class Leaderboard(Page):
                                                         manager=self.manager)
 
     def handle_event(self, event):
-        import main
+        
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.slider:
                 print(f"NUmber 1 is ME")
             if event.ui_element == self.back_button:
-                main.update_screen(0)
+                update_screen(0)
         self.manager.process_events(event)
 
 class LoginPage(Page):
@@ -77,20 +78,31 @@ class LoginPage(Page):
         )
         self.password_box.set_text_hidden(True)
     def handle_event(self, event):
-        import main
+        
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.enter:
                 self.username_box.set_text("")
                 self.password_box.set_text("")
                 print(f"No account matches these credentials")
             if event.ui_element == self.back_button:
-                main.update_screen(0)
+                update_screen(0)
         self.manager.process_events(event)
+
+
+main_bg=pygame.image.load('main_bg.png')
+logo=pygame.image.load('testpic.png')
 main_menu = MainMenu()
 leaderboard = Leaderboard()
 login_page = LoginPage()
-main_bg=pygame.image.load('main_bg.png')
-logo=pygame.image.load('testpic.png')
+
+screens=[main_menu , leaderboard , login_page]
+active_screen=screens[0]
+
+def update_screen(index):
+    """updates screen to given index"""
+    global active_screen
+    active_screen=screens[index]
+    
 
 
 
