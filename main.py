@@ -11,6 +11,8 @@ import menu
 while menu.running:
     time_delta = clock.tick(60) / 1000.0#clock tick 60 returns time between each frame in ms, /1000 turns to seconds
     for event in pygame.event.get():#listens for events
+        if event.type == pygame.QUIT:#close window with X
+            menu.running = False
         menu.active_screen.handle_event(event)
     menu.active_screen.update(time_delta,window)
     pygame.display.update()
