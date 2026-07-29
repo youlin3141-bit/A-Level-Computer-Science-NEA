@@ -1,4 +1,5 @@
 import pygame # user venv 3.14 computerscience nea
+#python 3.6??? works occasionally but not always?
 
 pygame.init()
 window = pygame.display.set_mode((800, 600))#create window 800x600
