@@ -1,6 +1,7 @@
 import pygame
 # pygame.init()
 import pygame_gui
+start_game=False
 running=True
 class Page:
     def __init__(self):
@@ -34,14 +35,18 @@ class MainMenu(Page):
             manager=self.manager,
         )
         self.back_button.set_text("Exit")
+        self.test_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((600, 400), (200, 50)), text='Test',manager=self.manager)
 
     def handle_event(self,event):
         global running
+        global start_game
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element ==self.play_button:
                 update_screen(2)
             if event.ui_element ==self.leaderboard_button:
                 update_screen(1)
+            if event.ui_element ==self.test_button:
+                start_game = True
             if event.ui_element ==self.back_button:#
                 running=False
         self.manager.process_events(event)

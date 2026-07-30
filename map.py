@@ -1,6 +1,5 @@
 import random
-import pygame
-PART_MIN_SIZE=20
+PART_MIN_SIZE=12
 ROOM_MIN_SIZE=6
 MAP_HEIGHT=60
 MAP_WIDTH=80
@@ -89,8 +88,12 @@ def carve_corridor(room1,room2):
     x2,y2=get_room_center(room2)
     for x in range(min(x1, x2), max(x1, x2) + 1):#create horizontal connection
         game_map[y1][x] = 1
+        game_map[y1+1][x]=1
+        game_map[y1-1][x]=1
     for y in range(min(y1, y2), max(y1, y2) + 1):#craete vertical section
         game_map[y][x2] = 1
+        game_map[y][x2+1]=1
+        game_map[y][x2-1] = 1
 def connect_rooms(node):
     if node.left and node.right:
         connect_rooms(node.left)#recursive function to interally connect each leaf node of the tree
