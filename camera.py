@@ -8,5 +8,5 @@ class Camera:
         self.x=0
         self.y=0
     def update(self,player):
-        self.x=player.x-self.screen_width//2
-        self.y=player.y-self.screen_height//2
+        self.x=player.rect.x-self.screen_width//2
+        self.y=player.rect.y-self.screen_height//2

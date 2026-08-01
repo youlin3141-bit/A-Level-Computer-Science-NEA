@@ -1,4 +1,7 @@
 import random
+
+from game import TILE_SIZE
+
 PART_MIN_SIZE=12
 ROOM_MIN_SIZE=6
 MAP_HEIGHT=60
@@ -110,7 +113,12 @@ def connect_rooms(node):
 
     if room1 and room2:
         carve_corridor(room1,room2)
-
+def find_spawn(node):
+    room=get_room(node)
+    x,y=get_room_center(room)
+    x=x*TILE_SIZE
+    y=y*TILE_SIZE
+    return x,y
 root=BSPNode(0,0,MAP_WIDTH,MAP_HEIGHT)#root node
 split(root)
 carve_rooms(root)

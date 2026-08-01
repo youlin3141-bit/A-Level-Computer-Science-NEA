@@ -19,7 +19,7 @@ class Page:
 
     def update(self, time_delta, window):
         window.blit(main_bg, (0, 0))#block image transfer, set 1 image onto another
-        window.blit(logo, (190, 0))
+        window.blit(main_logo, (250, 50))
         self.manager.update(time_delta)
         self.manager.draw_ui(window)
 
@@ -203,7 +203,9 @@ class CreateNewWorld(Page):
                 print(f"Difficulty set to: {event.text}")
         self.manager.process_events(event)
 main_bg=pygame.image.load('main_bg.png')
-logo=pygame.image.load('testpic.png')
+main_bg=pygame.transform.scale(main_bg,(800,600))
+main_logo=pygame.image.load('main_logo.png')
+main_logo=pygame.transform.scale(main_logo,(300,100))
 main_menu = MainMenu()
 leaderboard = Leaderboard()
 login_page = LoginPage()
