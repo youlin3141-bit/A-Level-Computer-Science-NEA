@@ -14,14 +14,14 @@ class Player:
         self.currency=0
         self.map=game_map
         #directional player sprites
-        self.player_up=pygame.image.load("player_up.png").convert_alpha()
-        self.player_down=pygame.image.load("player_down.png").convert_alpha()
-        self.player_right=pygame.image.load("player_right.png").convert_alpha()
-        self.player_left=pygame.image.load("player_left.png").convert_alpha()
-        self.player_down_right=pygame.image.load("player_down_right.png").convert_alpha()
-        self.player_down_left=pygame.image.load("player_down_left.png").convert_alpha()
-        self.player_up_right=pygame.image.load("player_up_right.png").convert_alpha()
-        self.player_up_left=pygame.image.load("player_up_left.png").convert_alpha()
+        self.player_up=pygame.image.load("assets/player_up.png").convert_alpha()
+        self.player_down=pygame.image.load("assets/player_down.png").convert_alpha()
+        self.player_right=pygame.image.load("assets/player_right.png").convert_alpha()
+        self.player_left=pygame.image.load("assets/player_left.png").convert_alpha()
+        self.player_down_right=pygame.image.load("assets/player_down_right.png").convert_alpha()
+        self.player_down_left=pygame.image.load("assets/player_down_left.png").convert_alpha()
+        self.player_up_right=pygame.image.load("assets/player_up_right.png").convert_alpha()
+        self.player_up_left=pygame.image.load("assets/player_up_left.png").convert_alpha()
         #resize scaled sprites
         self.player_down_right=pygame.transform.scale(self.player_down_right,(PLAYER_SIZE,PLAYER_SIZE))
         self.player_down_left=pygame.transform.scale(self.player_down_left,(PLAYER_SIZE,PLAYER_SIZE))

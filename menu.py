@@ -202,9 +202,9 @@ class CreateNewWorld(Page):
             if event.ui_element == self.difficulty_select:
                 print(f"Difficulty set to: {event.text}")
         self.manager.process_events(event)
-main_bg=pygame.image.load('main_bg.png')
+main_bg=pygame.image.load('assets/main_bg.png')
 main_bg=pygame.transform.scale(main_bg,(800,600))
-main_logo=pygame.image.load('main_logo.png')
+main_logo=pygame.image.load('assets/main_logo.png')
 main_logo=pygame.transform.scale(main_logo,(300,100))
 main_menu = MainMenu()
 leaderboard = Leaderboard()
