@@ -1,6 +1,5 @@
 import random
-
-from game import TILE_SIZE
+import settings
 
 PART_MIN_SIZE=12
 ROOM_MIN_SIZE=6
@@ -16,8 +15,6 @@ class BSPNode:
         self.height = height
         self.left = None #empty variable/doesnt exist
         self.right = None
-        self.top = None
-        self.bottom = None
         self.room=None
 def split(node):
     if node.width<=PART_MIN_SIZE*2 or node.height<=PART_MIN_SIZE*2:#checks if node is large enough to partition, e.g. 40 = 20+20
@@ -31,20 +28,16 @@ def split(node):
         split(node.right)
     else:
         split_center= random.randint(PART_MIN_SIZE,node.height-PART_MIN_SIZE)
-        node.top=BSPNode(node.x,node.y,node.width,split_center)
-        node.bottom=BSPNode(node.x,node.y+split_center,node.width,node.height-split_center)
-        split(node.top)
-        split(node.bottom)
+        node.left = BSPNode(node.x, node.y, node.width, split_center)
+        node.right = BSPNode(node.x, node.y + split_center, node.width, node.height - split_center)
+        split(node.left)
+        split(node.right)
 def carve_rooms(node):
-    if node.left or node.right or node.top or node.bottom:
+    if node.left or node.right :
         if node.left:
             carve_rooms(node.left)
         if node.right:
             carve_rooms(node.right)
-        if node.top:
-            carve_rooms(node.top)
-        if node.bottom:
-            carve_rooms(node.bottom)
         return
     room_width=random.randint(ROOM_MIN_SIZE,node.width-2)#creates rooms with boundaries so they do not overlap
     room_height=random.randint(ROOM_MIN_SIZE,node.height-2)
@@ -62,10 +55,6 @@ def create_all_rooms(node):#function to create every room in each node
         create_all_rooms(node.left)
     if node.right:
         create_all_rooms(node.right)
-    if node.top:
-        create_all_rooms(node.top)
-    if node.bottom:
-        create_all_rooms(node.bottom)
 def get_room(node):#returns the x,y width and height properties of teh room
     if node.room:
         return node.room
@@ -75,16 +64,10 @@ def get_room(node):#returns the x,y width and height properties of teh room
             return room
     elif node.right:
         return get_room(node.right)
-    if node.top:
-        room=get_room(node.top)
-        if room:
-            return room
-    elif node.bottom:
-        return get_room(node.bottom)
     return None
 def get_room_center(room):#finds the room center as an integer using modulus division
     if room:
-        return (room[0]+room[2]//2,room[1]+room[3]//2)
+        return room[0]+room[2]//2,room[1]+room[3]//2
     return None
 def carve_corridor(room1,room2):
     x1,y1=get_room_center(room1)
@@ -103,28 +86,36 @@ def connect_rooms(node):
         connect_rooms(node.right)
         room1=get_room(node.left)
         room2=get_room(node.right)
-    elif node.top and node.bottom:
-        connect_rooms(node.top)
-        connect_rooms(node.bottom)
-        room1=get_room(node.top)
-        room2=get_room(node.bottom)
     else:
         return
 
     if room1 and room2:
         carve_corridor(room1,room2)
-def find_spawn(node):
-    room=get_room(node)
-    x,y=get_room_center(room)
-    x=x*TILE_SIZE
-    y=y*TILE_SIZE
-    return x,y
+def list_rooms(node):
+    rooms=[]
+    if not node:
+        return rooms
+    if node.room:
+        rooms.append(node.room)
+    rooms+=list_rooms(node.left)
+    rooms+=list_rooms(node.right)
+    return rooms
+def find_spawn(rooms):
+    if not rooms:
+        return "Empty"
+    chosen_room=random.choice(rooms)
+    rooms.remove(chosen_room)
+    x,y=get_room_center(chosen_room)
+    x=x*settings.TILE_SIZE
+    y=y*settings.TILE_SIZE
+    return x,y,rooms
+
 root=BSPNode(0,0,MAP_WIDTH,MAP_HEIGHT)#root node
 split(root)
 carve_rooms(root)
 create_all_rooms(root)
 connect_rooms(root)
-for a in range (MAP_HEIGHT):
-        print(game_map[a])
+rooms = list_rooms(root)
+remaining_rooms=find_spawn(rooms)[2]
 
 

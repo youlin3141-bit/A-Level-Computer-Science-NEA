@@ -1,8 +1,8 @@
 import pygame
-
-from game import TILE_SIZE
+from image import load_image
+import settings
 PLAYER_SIZE=48
-SPEED=5
+SPEED=10
 class Player:
     def __init__(self,x,y,game_map):
         self.x = x
@@ -14,24 +14,16 @@ class Player:
         self.currency=0
         self.map=game_map
         #directional player sprites
-        self.player_up=pygame.image.load("assets/player_up.png").convert_alpha()
-        self.player_down=pygame.image.load("assets/player_down.png").convert_alpha()
-        self.player_right=pygame.image.load("assets/player_right.png").convert_alpha()
-        self.player_left=pygame.image.load("assets/player_left.png").convert_alpha()
-        self.player_down_right=pygame.image.load("assets/player_down_right.png").convert_alpha()
-        self.player_down_left=pygame.image.load("assets/player_down_left.png").convert_alpha()
-        self.player_up_right=pygame.image.load("assets/player_up_right.png").convert_alpha()
-        self.player_up_left=pygame.image.load("assets/player_up_left.png").convert_alpha()
-        #resize scaled sprites
-        self.player_down_right=pygame.transform.scale(self.player_down_right,(PLAYER_SIZE,PLAYER_SIZE))
-        self.player_down_left=pygame.transform.scale(self.player_down_left,(PLAYER_SIZE,PLAYER_SIZE))
-        self.player_up_right=pygame.transform.scale(self.player_up_right,(PLAYER_SIZE,PLAYER_SIZE))
-        self.player_up_left=pygame.transform.scale(self.player_up_left,(PLAYER_SIZE,PLAYER_SIZE))
-        self.player_left=pygame.transform.scale(self.player_left,(PLAYER_SIZE,PLAYER_SIZE))
-        self.player_up=pygame.transform.scale(self.player_up,(PLAYER_SIZE,PLAYER_SIZE))
-        self.player_down=pygame.transform.scale(self.player_down,(PLAYER_SIZE,PLAYER_SIZE))
-        self.player_right=pygame.transform.scale(self.player_right,(PLAYER_SIZE,PLAYER_SIZE))
+        self.player_up=load_image("assets/player_up.png",PLAYER_SIZE,PLAYER_SIZE)
+        self.player_down=load_image("assets/player_down.png",PLAYER_SIZE,PLAYER_SIZE)
+        self.player_right=load_image("assets/player_right.png",PLAYER_SIZE,PLAYER_SIZE)
+        self.player_left=load_image("assets/player_left.png",PLAYER_SIZE,PLAYER_SIZE)
+        self.player_down_right=load_image("assets/player_down_right.png",PLAYER_SIZE,PLAYER_SIZE)
+        self.player_down_left=load_image( "assets/player_down_left.png",PLAYER_SIZE,PLAYER_SIZE)
+        self.player_up_right=load_image("assets/player_up_right.png",PLAYER_SIZE,PLAYER_SIZE)
+        self.player_up_left=load_image( "assets/player_up_left.png",PLAYER_SIZE,PLAYER_SIZE)
         self.image=self.player_down
+
     def handle_input(self):
         key = pygame.key.get_pressed()#returns list of bool
         direction = [
@@ -55,13 +47,13 @@ class Player:
         if key[pygame.K_d]:
             dx+=self.speed
         def check_collision(self,rect):
-            left=rect.left//TILE_SIZE
-            right=(rect.right-1)//TILE_SIZE#occupies 0-31 tiles hence the -1
-            top=rect.top//TILE_SIZE
-            bottom=(rect.bottom-1)//TILE_SIZE
+            left=rect.left//settings.TILE_SIZE
+            right=(rect.right-1)//settings.TILE_SIZE#occupies 0-31 tiles hence the -1
+            top=rect.top//settings.TILE_SIZE
+            bottom=(rect.bottom-1)//settings.TILE_SIZE
             for row in range(top,bottom+1):
                 for column in range(left,right+1):
-                    print(self.x//TILE_SIZE,self.y//TILE_SIZE,row,column)
+                    # print(self.x//settings.TILE_SIZE,self.y//settings.TILE_SIZE,row,column)
                     if self.map[row][column] == 0:
                         return True
             return False

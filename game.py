@@ -1,32 +1,34 @@
-import pygame
-TILE_SIZE = 32
+import settings
 from player import Player
 from camera import Camera
 from minimap import Minimap
+from image import load_image
+from enemy import Enemy
 import map
 class Game:
     def __init__(self):
         self.map = map.game_map
-        self.player = Player(map.find_spawn(map.root)[0],map.find_spawn(map.root)[1],self.map)
+        playerx,playery,remaining_rooms=map.find_spawn(map.remaining_rooms)
+        enemyx,enemyy,remaining_rooms1=map.find_spawn(map.remaining_rooms)
+        self.player = Player(playerx,playery,self.map)
         self.camera = Camera(800,600)
-        self.wall=pygame.image.load("assets/wall2.png").convert_alpha()
-        self.floor = pygame.image.load("assets/floor1.png").convert_alpha()
-        self.wall=pygame.transform.scale(self.wall,(TILE_SIZE,TILE_SIZE))
-        self.floor=pygame.transform.scale(self.floor,(TILE_SIZE,TILE_SIZE))
+        self.wall=load_image("assets/wall.png",settings.TILE_SIZE,settings.TILE_SIZE)
+        self.floor=load_image("assets/floor.png",settings.TILE_SIZE,settings.TILE_SIZE)
+        self.enemy=Enemy(enemyx,enemyy,self.map,48,48,"enemy1","assets/enemy1.png")
 
     def update(self,window):
-        # print("updating")
         self.player.handle_input()
+        self.enemy.update()
         self.camera.update(self.player)
         self.draw(window)
 
     def draw(self,window):
         window.fill((0,0,0))
-        first_column=self.camera.x//TILE_SIZE
-        last_column=first_column + 800 // TILE_SIZE + 2# allows for camera to move smoothly as extra tiles are rendered
-        first_row=self.camera.y//TILE_SIZE
-        last_row=first_row + 600 // TILE_SIZE + 2
-        minimap=Minimap(self.map,TILE_SIZE)
+        first_column=self.camera.x//settings.TILE_SIZE
+        last_column=first_column + 800 // settings.TILE_SIZE + 2# allows for camera to move smoothly as extra tiles are rendered
+        first_row=self.camera.y//settings.TILE_SIZE
+        last_row=first_row + 600 // settings.TILE_SIZE + 2
+        minimap=Minimap(self.map,settings.TILE_SIZE)
 
         # print(first_column, last_column)
         # print(first_row, last_row)
@@ -37,6 +39,7 @@ class Game:
                         image=self.wall
                     else:
                         image=self.floor
-                    window.blit(image,(column*TILE_SIZE-self.camera.x,row*TILE_SIZE-self.camera.y))#converting world coordinate to screen coordinate
+                    window.blit(image,(column*settings.TILE_SIZE-self.camera.x,row*settings.TILE_SIZE-self.camera.y))#converting world coordinate to screen coordinate
         minimap.draw(window,self.player)
         window.blit(self.player.image,(self.player.rect.x-self.camera.x,self.player.rect.y-self.camera.y))
+        self.enemy.draw(window,self.camera)

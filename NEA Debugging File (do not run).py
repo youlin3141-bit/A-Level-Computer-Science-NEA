@@ -126,8 +126,8 @@ import pygame
 #
 # for a in range (MAP_HEIGHT):
 #         print(game_map[a])
-key = pygame.key.get_pressed()
-if key[pygame.K_w]:
-    print("w")
+# key = pygame.key.get_pressed()
+# if key[pygame.K_w]:
+#     print("w")
 
 
