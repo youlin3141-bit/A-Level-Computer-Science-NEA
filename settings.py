@@ -1,1 +1,11 @@
 TILE_SIZE=32
+ENEMY_COUNT=1
+ENEMY_TYPES={
+    "monster0":{
+        "height":48,
+        "width":48,
+        "speed":2,
+        "damage":20,
+        "image":"assets/enemy1.png"
+    }
+}

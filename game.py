@@ -5,20 +5,34 @@ from minimap import Minimap
 from image import load_image
 from enemy import Enemy
 import map
+import random
 class Game:
     def __init__(self):
         self.map = map.game_map
-        playerx,playery,remaining_rooms=map.find_spawn(map.remaining_rooms)
-        enemyx,enemyy,remaining_rooms1=map.find_spawn(map.remaining_rooms)
-        self.player = Player(playerx,playery,self.map)
+        self.valid_spawns=map.find_spawn(map.rooms)
+        spawn=random.choice(self.valid_spawns)
+        x,y=spawn
+        self.valid_spawns.remove(spawn)
+        self.player = Player(x,y,self.map)
         self.camera = Camera(800,600)
         self.wall=load_image("assets/wall.png",settings.TILE_SIZE,settings.TILE_SIZE)
         self.floor=load_image("assets/floor.png",settings.TILE_SIZE,settings.TILE_SIZE)
-        self.enemy=Enemy(enemyx,enemyy,self.map,48,48,"enemy1","assets/enemy1.png")
+        self.enemies=[]
+        self.spawn_enemy()
 
-    def update(self,window):
+    def spawn_enemy(self):
+        for i in range(settings.ENEMY_COUNT):
+            spawn = random.choice(self.valid_spawns)
+            x, y = spawn
+            print(spawn)
+            self.valid_spawns.remove(spawn)
+            enemy=Enemy(x,y,self.map,"monster0")
+            self.enemies.append(enemy)
+
+    def update(self, window):
         self.player.handle_input()
-        self.enemy.update()
+        for enemy in self.enemies:
+            enemy.update(self.player)
         self.camera.update(self.player)
         self.draw(window)
 
@@ -42,4 +56,5 @@ class Game:
                     window.blit(image,(column*settings.TILE_SIZE-self.camera.x,row*settings.TILE_SIZE-self.camera.y))#converting world coordinate to screen coordinate
         minimap.draw(window,self.player)
         window.blit(self.player.image,(self.player.rect.x-self.camera.x,self.player.rect.y-self.camera.y))
-        self.enemy.draw(window,self.camera)
+        for enemy in self.enemies:
+            enemy.draw(window,self.camera)

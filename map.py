@@ -102,13 +102,15 @@ def list_rooms(node):
     return rooms
 def find_spawn(rooms):
     if not rooms:
-        return "Empty"
-    chosen_room=random.choice(rooms)
-    rooms.remove(chosen_room)
-    x,y=get_room_center(chosen_room)
-    x=x*settings.TILE_SIZE
-    y=y*settings.TILE_SIZE
-    return x,y,rooms
+        return 0,0,[0]
+    valid_spawns=[]
+    for room in rooms:
+        x,y=get_room_center(room)
+        x*=settings.TILE_SIZE
+        y*=settings.TILE_SIZE
+        valid_spawns.append((x,y))
+    print(valid_spawns)
+    return valid_spawns
 
 root=BSPNode(0,0,MAP_WIDTH,MAP_HEIGHT)#root node
 split(root)
@@ -116,6 +118,6 @@ carve_rooms(root)
 create_all_rooms(root)
 connect_rooms(root)
 rooms = list_rooms(root)
-remaining_rooms=find_spawn(rooms)[2]
+
 
 
