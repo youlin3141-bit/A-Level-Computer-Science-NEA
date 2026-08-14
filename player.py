@@ -24,6 +24,16 @@ class Player:
         self.player_up_left=load_image( "assets/player_up_left.png",PLAYER_SIZE,PLAYER_SIZE)
         self.image=self.player_down
 
+    def check_collision(self, rect):
+        left = rect.left//settings.TILE_SIZE
+        right = (rect.right-1)//settings.TILE_SIZE  # occupies 0-31 tiles hence the -1
+        top = rect.top//settings.TILE_SIZE
+        bottom = (rect.bottom-1)//settings.TILE_SIZE
+        for row in range(top,bottom+1):
+            for column in range(left,right+1):
+                if self.map[row][column] == 0:
+                    return True
+        return False
     def handle_input(self):
         key = pygame.key.get_pressed()#returns list of bool
         direction = [
@@ -46,24 +56,14 @@ class Player:
             dx-=self.speed
         if key[pygame.K_d]:
             dx+=self.speed
-        def check_collision(self,rect):
-            left=rect.left//settings.TILE_SIZE
-            right=(rect.right-1)//settings.TILE_SIZE#occupies 0-31 tiles hence the -1
-            top=rect.top//settings.TILE_SIZE
-            bottom=(rect.bottom-1)//settings.TILE_SIZE
-            for row in range(top,bottom+1):
-                for column in range(left,right+1):
-                    # print(self.x//settings.TILE_SIZE,self.y//settings.TILE_SIZE,row,column)
-                    if self.map[row][column] == 0:
-                        return True
-            return False
+
         new_rect=self.rect.copy()
         new_rect.x+=dx
-        if not check_collision(self,new_rect):
+        if not self.check_collision(new_rect):
             self.rect.x=new_rect.x
         new_rect=self.rect.copy()
         new_rect.y+=dy
-        if not check_collision(self,new_rect):
+        if not self.check_collision(new_rect):
             self.rect.y=new_rect.y
         self.x=new_rect.x
         self.y=new_rect.y

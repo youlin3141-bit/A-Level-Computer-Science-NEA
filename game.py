@@ -54,7 +54,8 @@ class Game:
                     else:
                         image=self.floor
                     window.blit(image,(column*settings.TILE_SIZE-self.camera.x,row*settings.TILE_SIZE-self.camera.y))#converting world coordinate to screen coordinate
-        minimap.draw(window,self.player)
-        window.blit(self.player.image,(self.player.rect.x-self.camera.x,self.player.rect.y-self.camera.y))
         for enemy in self.enemies:
             enemy.draw(window,self.camera)
+        minimap.draw(window,self.player)
+        window.blit(self.player.image,(self.player.rect.x-self.camera.x,self.player.rect.y-self.camera.y))
+

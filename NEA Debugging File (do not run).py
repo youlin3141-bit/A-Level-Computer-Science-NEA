@@ -129,5 +129,6 @@ import pygame
 # key = pygame.key.get_pressed()
 # if key[pygame.K_w]:
 #     print("w")
-
+list=["Apple","Banana","Carrot"]
+print(min(list,key=lambda x:x[5]))
 

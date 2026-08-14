@@ -73,7 +73,7 @@ def carve_corridor(room1,room2):
     x1,y1=get_room_center(room1)
     x2,y2=get_room_center(room2)
     for x in range(min(x1, x2), max(x1, x2) + 1):#create horizontal connection
-        game_map[y1][x] = 1
+        game_map[y1][x]=1
         game_map[y1+1][x]=1
         game_map[y1-1][x]=1
     for y in range(min(y1, y2), max(y1, y2) + 1):#craete vertical section

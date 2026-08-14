@@ -25,7 +25,7 @@ class Minimap:
                         colour=(100,100,100)
                     pygame.draw.rect(self.surface,colour,(screen_x,screen_y,MINIMAP_TILE_SIZE,MINIMAP_TILE_SIZE))
         pygame.draw.circle(self.surface,
-                           (255,0,0),
+                           (255,255,255),
                            (MINIMAP_SIZE//2,MINIMAP_SIZE//2),
                            3)
         window.blit(self.surface,(600,20))
