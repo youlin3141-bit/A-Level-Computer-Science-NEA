@@ -1,5 +1,5 @@
 TILE_SIZE=32
-ENEMY_COUNT=3
+ENEMY_COUNT=1
 ENEMY_TYPES={
     "monster0":{
         "height":48,
@@ -7,7 +7,7 @@ ENEMY_TYPES={
         "speed":2,
         "damage":20,
         "health":100,
-        "view_radius":1000,
+        "view_radius":200,
         "image":"assets/enemy1.png"
     }
 }

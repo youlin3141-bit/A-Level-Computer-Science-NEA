@@ -129,6 +129,7 @@ import pygame
 # key = pygame.key.get_pressed()
 # if key[pygame.K_w]:
 #     print("w")
-list=["Apple","Banana","Carrot"]
-print(min(list,key=lambda x:x[5]))
+import math
+import settings
+print(math.sqrt(2*(settings.ENEMY_TYPES["monster0"]["speed"]*settings.TILE_SIZE)**2))
 
