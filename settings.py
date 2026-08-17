@@ -7,7 +7,15 @@ ENEMY_TYPES={
         "speed":2,
         "damage":20,
         "health":100,
-        "view_radius":200,
+        "view_radius":500,
         "image":"assets/enemy1.png"
     }
 }
+
+# ITEM_TYPES={
+#     "mace":{
+#         "damage":30,
+#         "cooldown":45,#frames
+#         "image":"assets/mace.png"
+#     }
+# }

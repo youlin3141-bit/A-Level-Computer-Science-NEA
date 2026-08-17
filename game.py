@@ -1,4 +1,5 @@
 import settings
+import items
 from player import Player
 from camera import Camera
 from minimap import Minimap
@@ -19,6 +20,10 @@ class Game:
         self.floor=load_image("assets/floor.png",settings.TILE_SIZE,settings.TILE_SIZE)
         self.enemies=[]
         self.spawn_enemy()
+        for index in range(len(self.player.items)):
+            if not self.player.items[index]:
+                self.player.items[index]=items.Mace(self.player,self.enemies)
+                break
 
     def spawn_enemy(self):
         for i in range(settings.ENEMY_COUNT):
@@ -33,6 +38,8 @@ class Game:
         self.player.handle_input()
         for enemy in self.enemies:
             enemy.update(self.player)
+            if enemy.health <= 0:
+                self.enemies.remove(enemy)
         self.camera.update(self.player)
         self.draw(window)
 
@@ -58,4 +65,9 @@ class Game:
             enemy.draw(window,self.camera)
         minimap.draw(window,self.player)
         window.blit(self.player.image,(self.player.rect.x-self.camera.x,self.player.rect.y-self.camera.y))
+        self.player.draw_health_bar(window)
+        self.player.draw_inventory(window)
+
+        if self.player.current_item: # to be removed
+            self.player.current_item.draw_hitbox(window, self.camera)
 

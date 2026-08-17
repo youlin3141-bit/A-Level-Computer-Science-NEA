@@ -128,8 +128,13 @@ import pygame
 #         print(game_map[a])
 # key = pygame.key.get_pressed()
 # if key[pygame.K_w]:
-#     print("w")
-import math
-import settings
-print(math.sqrt(2*(settings.ENEMY_TYPES["monster0"]["speed"]*settings.TILE_SIZE)**2))
-
+#      print("w")
+# import math
+# import settings
+# print(math.sqrt(2*(settings.ENEMY_TYPES["monster0"]["speed"]*settings.TILE_SIZE)**2))
+list=[]
+list1=[None,None,None]
+for index in range (len(list1)):
+    if not list1[index]:
+        list1[index]=2
+print(list1)
