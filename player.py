@@ -33,13 +33,16 @@ class Player:
         self.player_up_left=load_image( "assets/player_up_left.png",PLAYER_SIZE,PLAYER_SIZE)
         self.image=self.player_down
     def take_damage(self, damage):
-        if self.health-damage>0:
-            self.health-=damage
-            return
-        else:
-            self.health=0
-            #you died!
-            return
+        self.immunity_frames-=1
+        if self.immunity_frames<0:
+            self.immunity_frames = 30
+            if self.health-damage > 0:
+                self.health-=damage
+                return
+            else:
+                self.health=0
+                #you died!
+                return
     def draw_health_bar(self,window):
         if self.health<0:
             self.health=0

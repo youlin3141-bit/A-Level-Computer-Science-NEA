@@ -132,9 +132,12 @@ import pygame
 # import math
 # import settings
 # print(math.sqrt(2*(settings.ENEMY_TYPES["monster0"]["speed"]*settings.TILE_SIZE)**2))
-list=[]
-list1=[None,None,None]
-for index in range (len(list1)):
-    if not list1[index]:
-        list1[index]=2
-print(list1)
+# list=[]
+# list1=[None,None,None]
+# for index in range (len(list1)):
+#     if not list1[index]:
+#         list1[index]=2
+# print(list1)
+direction=pygame.Vector2(1,2)
+direction = direction.normalize()
+print(direction.x,direction.y)

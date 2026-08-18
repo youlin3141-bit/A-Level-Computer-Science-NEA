@@ -1,5 +1,6 @@
 from image import load_image
 import pygame
+from projectile import PlayerProjectile
 class Items:
     def __init__(self,name,damage,image,cooldown):
         self.name = name
@@ -11,7 +12,6 @@ class Items:
 
     def draw_hitbox(self, window, camera):
         hitbox = self.get_hitbox()
-
         pygame.draw.rect(
             window,
             (255, 0, 0),
@@ -22,9 +22,11 @@ class Items:
                 hitbox.height),
             2
         )
+
     def update(self):#
         if self.cooldown>=0:
             self.cooldown-=1
+
 class Mace(Items):
     def __init__(self,player,enemies):
         self.player = player
@@ -45,8 +47,49 @@ class Mace(Items):
         if self.cooldown>0:
             return
         if self.cooldown<=0:
-            print(f"attack")
+            print(f"melee attack")
             for enemy in self.enemies:
                 if enemy.rect.colliderect(self.get_hitbox()):
                     enemy.take_damage(self.damage)
             self.cooldown = 30
+
+class SpellBook(Items):
+    def __init__(self,player,enemies,projectiles_list):
+        self.player=player
+        self.enemies=enemies
+        self.projectiles=[]
+        self.directions=[]
+        self.projectiles_list=projectiles_list
+        super().__init__("SpellBook",
+                         10,
+                         load_image("assets/spellbook.png",60,60),0)
+    def use(self):
+        if self.cooldown>0:
+            return
+        if self.cooldown<=0:
+            print(f"ranged attack")
+            for x in range(-1, 2):
+                for y in range(-1, 2):
+                    if x == 0 and y == 0:
+                        continue
+                    direction=pygame.Vector2(x,y)
+                    new_proj = PlayerProjectile(self.player.rect.centerx,
+                                                self.player.rect.centery,
+                                                2,10,
+                                                "assets/spellbookprojectile.png",
+                                                direction,
+                                                self.enemies)
+                    self.projectiles.append(new_proj)
+                    self.projectiles_list.append(new_proj)
+            self.cooldown = 30
+    # def get_hitbox(self,projectile):
+    #     return pygame.Rect(
+    #         projectile.rect.x,
+    #         projectile.rect.y,
+    #         10,10
+    #     )
+
+    def draw_hitbox(self,window,camera):
+        # for projectile in self.projectiles:
+        #     window.blit(self.image,(projectile.x-camera.x,projectile.y-camera.y))
+        pass

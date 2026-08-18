@@ -4,7 +4,7 @@ from player import Player
 from camera import Camera
 from minimap import Minimap
 from image import load_image
-from enemy import Enemy
+import monster
 import map
 import random
 class Game:
@@ -18,12 +18,11 @@ class Game:
         self.camera = Camera(800,600)
         self.wall=load_image("assets/wall.png",settings.TILE_SIZE,settings.TILE_SIZE)
         self.floor=load_image("assets/floor.png",settings.TILE_SIZE,settings.TILE_SIZE)
+        self.projectiles=[]
         self.enemies=[]
         self.spawn_enemy()
-        for index in range(len(self.player.items)):
-            if not self.player.items[index]:
-                self.player.items[index]=items.Mace(self.player,self.enemies)
-                break
+        self.player.items[0]=items.Mace(self.player,self.enemies)
+        self.player.items[1] = items.SpellBook(self.player, self.enemies,self.projectiles)
 
     def spawn_enemy(self):
         for i in range(settings.ENEMY_COUNT):
@@ -31,15 +30,18 @@ class Game:
             x, y = spawn
             print(spawn)
             self.valid_spawns.remove(spawn)
-            enemy=Enemy(x,y,self.map,"monster0")
+            enemy=monster.RangeEnemy(x,y,self.map,"range1",self.projectiles)
             self.enemies.append(enemy)
 
     def update(self, window):
         self.player.handle_input()
         for enemy in self.enemies:
             enemy.update(self.player)
+            enemy.attack(self.player)
             if enemy.health <= 0:
                 self.enemies.remove(enemy)
+        for projectile in self.projectiles:
+            projectile.update()
         self.camera.update(self.player)
         self.draw(window)
 
@@ -63,6 +65,9 @@ class Game:
                     window.blit(image,(column*settings.TILE_SIZE-self.camera.x,row*settings.TILE_SIZE-self.camera.y))#converting world coordinate to screen coordinate
         for enemy in self.enemies:
             enemy.draw(window,self.camera)
+        for projectile in self.projectiles:
+            projectile.draw(window,self.camera)
+
         minimap.draw(window,self.player)
         window.blit(self.player.image,(self.player.rect.x-self.camera.x,self.player.rect.y-self.camera.y))
         self.player.draw_health_bar(window)

@@ -3,6 +3,9 @@ import random
 from pathfinding import astar
 import settings
 from image import load_image
+from projectile import EnemyProjectile
+
+
 class Enemy:
     def __init__(self,x,y,game_map,enemy_type):
         self.x=float(x)
@@ -15,6 +18,8 @@ class Enemy:
         self.wander_timer=0
         self.search_duration=210
         self.immunity_frames=0
+        self.cooldown=0
+        self.enemy_type=enemy_type
 
         stats=settings.ENEMY_TYPES[enemy_type]
         self.health=stats["health"]
@@ -36,10 +41,13 @@ class Enemy:
     #                 return True
     #     return False
     def take_damage(self,damage):
-        self.health-=damage
-        print(f"enemy new health:{self.health}")
-        if self.health<=0:
-            self.health=0
+        if self.immunity_frames<=0:
+            self.health-=damage
+            print(f"enemy new health:{self.health}")
+            if self.health<=0:
+                self.health=0
+            self.immunity_frames=30
+            return
         return
     def can_see_player(self,player):
         distance = pygame.Vector2(self.rect.center).distance_to(player.rect.center)  # builtin vector methods to calc distance
@@ -70,16 +78,16 @@ class Enemy:
         self.rect.y=round(self.y)
 
     def update(self,player):
+        if self.cooldown>0:
+            self.cooldown-=1
         if self.state=="wander":
             self.wander(player)
         if self.state=="chase":
             self.chase(player)
         if self.state=="search":
             self.search(player)
-        self.immunity_frames-=1
-        if self.rect.colliderect(player.rect) and self.immunity_frames<0:
-            player.take_damage(self.damage)
-            self.immunity_frames=30
+        if self.immunity_frames>0:
+            self.immunity_frames-=1
     def traverse_path(self,path):
         if not path or len(path) <= 1:
             return
@@ -166,4 +174,29 @@ class Enemy:
         self.traverse_path(self.path)
     def draw(self,window,camera):
         window.blit(self.image,(self.rect.x-camera.x,self.rect.y-camera.y))
+
+class MeleeEnemy(Enemy):
+    def attack(self,player):
+        if self.cooldown<=0:
+            if self.rect.colliderect(player.rect):
+                player.take_damage(self.damage)
+                self.cooldown=30
+
+class RangeEnemy(Enemy):#
+    def __init__(self,x,y,game_map,enemy_type,projectiles):
+        super().__init__(x,y,game_map,enemy_type)
+        self.projectiles=projectiles
+    def attack(self,player):
+        if self.cooldown<=0:
+            if self.can_see_player(player):
+                projectile=EnemyProjectile(
+                    self.rect.centerx,self.rect.centery,
+                    2,
+                    self.damage,
+                    player,
+                    self.enemy_type
+                )
+                self.projectiles.append(projectile)
+                self.cooldown=60
+                print("enemyshoot")
 
