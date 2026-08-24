@@ -31,8 +31,9 @@ class Mace(Items):
     def __init__(self,player,enemies):
         self.player = player
         self.enemies=enemies
+        self.damage=30+self.player.damage_upgrade
         super().__init__("Mace",
-                         30,
+                         self.damage,
                          load_image("assets/mace.png",60,60),0)
     def get_hitbox(self):
         return pygame.Rect(
@@ -60,8 +61,9 @@ class SpellBook(Items):
         self.projectiles=[]
         self.directions=[]
         self.projectiles_list=projectiles_list
+        self.damage=10+self.player.damage_upgrade
         super().__init__("SpellBook",
-                         10,
+                         self.damage,
                          load_image("assets/spellbook.png",60,60),0)
     def use(self):
         if self.cooldown>0:

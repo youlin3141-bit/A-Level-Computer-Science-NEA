@@ -1,5 +1,7 @@
 import pygame
 from image import load_image
+import random
+from progression import Progression
 import settings
 PLAYER_SIZE=48
 SPEED=10
@@ -9,17 +11,21 @@ class Player:
         self.y = y
         self.rect=pygame.Rect(x,y,PLAYER_SIZE,PLAYER_SIZE)
         self.speed=SPEED
+        self.progression=Progression()
         self.immunity_frames=0
+        self.upgrades=["Speed",
+                       "Max Health",
+                       "Damage"]
+        self.damage_upgrade=0
+        self.upgrade=None
 
         self.score=0
         self.items=[None,None,None]
         self.item_index=0
-        self.currency=0
         self.lives=0 #changes depend on diffculty
         self.max_health=100
         self.current_item=self.items[0]
         self.health=self.max_health
-        self.xp=0
 
         self.map=game_map
         #directional player sprites
@@ -49,7 +55,7 @@ class Player:
         bar_width=130
         bar_height=10
         font=pygame.font.SysFont("Arial",20)
-        text=font.render(f"Health: {self.health}/{self.max_health}",True,(255,255,255))
+        text=font.render(f"Health: {int(self.health)}/{self.max_health}",True,(255,255,255))
         x = 20
         y = 50
         pygame.draw.rect(window,(200,200,200),(x-2,y-2,bar_width+4,bar_height+4))
@@ -57,6 +63,39 @@ class Player:
         window.blit(text,(20,20))
         bar_ratio=self.health/self.max_health
         pygame.draw.rect(window,(0,200,0),(x,y,bar_width*bar_ratio,bar_height))
+        return
+    def draw_upgrade(self, window):
+        if not self.upgrade:
+            return
+        font=pygame.font.SysFont("Arial",20)
+        if self.upgrade=="Speed": text= "LEVEL UP!  +0.5 SPEED"
+        if self.upgrade=="Damage": text="LEVEL UP!  +2 DAMAGE"
+        if self.upgrade=="Max Health": text="LEVEL UP!  +10 MAX HEALTH"
+        text=font.render(text,True,(255,255,255))
+        window.blit(text,(5,530))
+    def draw_currency(self,window):
+        bar_width=50
+        bar_height=30
+        font=pygame.font.SysFont("Arial",20)
+        text=font.render(f"{self.progression.currency}",True,(255,255,255))
+        x=20
+        y=75
+        pygame.draw.rect(window,(100,100,100),(x,y,bar_width,bar_height))
+        window.blit(text,(25,77))
+        window.blit(load_image("assets/currency.png",30,30),(40,75))
+        pass
+    def draw_xp(self,window):
+        bar_width = 100
+        bar_height = 5
+        font=pygame.font.SysFont("Arial",12)
+        text=font.render(f"LV{self.progression.level}",True,(255,255,255))
+        x = 20
+        y = 65
+        window.blit(text,(x+bar_width+5,y-3))
+        pygame.draw.rect(window, (200, 200, 200), (x - 2, y - 2, bar_width + 4, bar_height + 4))
+        pygame.draw.rect(window, (100, 100, 100), (x, y, bar_width, bar_height))
+        bar_ratio = self.progression.xp/self.progression.xp_required()
+        pygame.draw.rect(window, (0, 200, 0), (x, y, bar_width * bar_ratio, bar_height))
         return
     def draw_inventory(self,window):
         slot_size=60
@@ -149,3 +188,15 @@ class Player:
         self.current_item=self.items[self.item_index]
         if self.current_item and (key[pygame.K_SPACE] or mouse[0]):
             self.current_item.use()
+
+
+        if self.progression.levelled_up:
+            self.upgrade=random.choice(self.upgrades)
+            if self.upgrade=="Speed":
+                self.speed+=0.5
+            if self.upgrade=="Damage":
+                self.damage_upgrade+=2
+            if self.upgrade=="Max Health":
+                self.max_health+=10
+                self.health+=10
+            self.progression.levelled_up=False

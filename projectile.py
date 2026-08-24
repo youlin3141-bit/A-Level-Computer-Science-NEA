@@ -8,6 +8,7 @@ class Projectile:
         self.speed=speed
         self.damage=damage
         self.rect=pygame.Rect(x,y,10,10)
+        self.projectile_timer=120
     def update(self):
         pass
 
@@ -38,6 +39,7 @@ class EnemyProjectile(Projectile):
     def __init__(self,x,y,speed,damage,target,enemy_type):
         super().__init__(x,y,speed,damage)
         self.target=target
+        self.projectile_timer=300
         self.image = load_image(settings.ENEMY_TYPES[enemy_type]["projectile_image"], 10, 10)
         direction = pygame.Vector2(target.rect.centerx - x, target.rect.centery - y)
         if direction.length() > 0:

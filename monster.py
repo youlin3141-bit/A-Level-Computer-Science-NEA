@@ -7,7 +7,7 @@ from projectile import EnemyProjectile
 
 
 class Enemy:
-    def __init__(self,x,y,game_map,enemy_type):
+    def __init__(self,x,y,game_map,enemy_type,difficulty):
         self.x=float(x)
         self.y=float(y)
         self.map=game_map
@@ -22,12 +22,17 @@ class Enemy:
         self.enemy_type=enemy_type
 
         stats=settings.ENEMY_TYPES[enemy_type]
-        self.health=stats["health"]
-        self.speed=stats["speed"]
-        self.damage=stats["damage"]
+        stats_difficulty=settings.DIFFICULTY[difficulty]
+
+        self.health=stats["health"]*stats_difficulty["stats_multiplier"]
+        self.speed=stats["speed"]*stats_difficulty["speed_multiplier"]
+        self.damage=stats["damage"]*stats_difficulty["stats_multiplier"]
+
         self.rect=pygame.Rect(x,y,stats["width"],stats["height"])
         self.image=load_image(stats["image"],stats["width"],stats["height"])
         self.view_radius=stats["view_radius"]
+        self.currency_yield=stats["currency_yield"]
+        self.xp_yield=stats["xp_yield"]*stats_difficulty["xp_multiplier"]
 
         self.state="wander"
     # def check_collision(self, rect):
@@ -183,8 +188,8 @@ class MeleeEnemy(Enemy):
                 self.cooldown=30
 
 class RangeEnemy(Enemy):#
-    def __init__(self,x,y,game_map,enemy_type,projectiles):
-        super().__init__(x,y,game_map,enemy_type)
+    def __init__(self,x,y,game_map,enemy_type,projectiles,difficulty):
+        super().__init__(x,y,game_map,enemy_type,difficulty)
         self.projectiles=projectiles
     def attack(self,player):
         if self.cooldown<=0:

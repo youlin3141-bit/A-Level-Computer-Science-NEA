@@ -13,7 +13,9 @@ class Game:
         self.valid_spawns=map.find_spawn(map.rooms)
         spawn=random.choice(self.valid_spawns)
         x,y=spawn
+        self.x1,self.y1=spawn
         self.valid_spawns.remove(spawn)
+        self.difficulty="Easy"
         self.player = Player(x,y,self.map)
         self.camera = Camera(800,600)
         self.wall=load_image("assets/wall.png",settings.TILE_SIZE,settings.TILE_SIZE)
@@ -30,7 +32,7 @@ class Game:
             x, y = spawn
             print(spawn)
             self.valid_spawns.remove(spawn)
-            enemy=monster.RangeEnemy(x,y,self.map,"range1",self.projectiles)
+            enemy=monster.RangeEnemy(self.x1,self.y1,self.map,"range1",self.projectiles,self.difficulty)
             self.enemies.append(enemy)
 
     def update(self, window):
@@ -40,8 +42,14 @@ class Game:
             enemy.attack(self.player)
             if enemy.health <= 0:
                 self.enemies.remove(enemy)
+                self.player.progression.add_xp(enemy.xp_yield)
+                self.player.progression.add_currency(enemy.currency_yield)
         for projectile in self.projectiles:
             projectile.update()
+            projectile.projectile_timer-=1
+            if projectile.projectile_timer <= 0:
+                self.projectiles.remove(projectile)
+
         self.camera.update(self.player)
         self.draw(window)
 
@@ -72,7 +80,9 @@ class Game:
         window.blit(self.player.image,(self.player.rect.x-self.camera.x,self.player.rect.y-self.camera.y))
         self.player.draw_health_bar(window)
         self.player.draw_inventory(window)
-
+        self.player.draw_xp(window)
+        self.player.draw_currency(window)
+        self.player.draw_upgrade(window)
         if self.player.current_item: # to be removed
             self.player.current_item.draw_hitbox(window, self.camera)
 
