@@ -138,6 +138,8 @@ import pygame
 #     if not list1[index]:
 #         list1[index]=2
 # print(list1)
-direction=pygame.Vector2(1,2)
-direction = direction.normalize()
-print(direction.x,direction.y)
+# direction=pygame.Vector2(1,2)
+# direction = direction.normalize()
+# print(direction.x,direction.y)
+list=[True,True,False,True]
+print(all(list))

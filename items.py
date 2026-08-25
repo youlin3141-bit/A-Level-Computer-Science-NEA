@@ -9,6 +9,9 @@ class Items:
         self.cooldown=cooldown
     def use(self):
         pass
+    def update(self):#
+        if self.cooldown>=0:
+            self.cooldown-=1
 
     def draw_hitbox(self, window, camera):
         hitbox = self.get_hitbox()
@@ -23,9 +26,6 @@ class Items:
             2
         )
 
-    def update(self):#
-        if self.cooldown>=0:
-            self.cooldown-=1
 
 class Mace(Items):
     def __init__(self,player,enemies):

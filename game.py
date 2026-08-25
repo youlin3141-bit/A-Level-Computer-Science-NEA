@@ -1,4 +1,5 @@
 import settings
+from exit import Exit,Generator
 import items
 from player import Player
 from camera import Camera
@@ -9,34 +10,113 @@ import map
 import random
 class Game:
     def __init__(self):
-        self.map = map.game_map
-        self.valid_spawns=map.find_spawn(map.rooms)
-        spawn=random.choice(self.valid_spawns)
-        x,y=spawn
-        self.x1,self.y1=spawn
-        self.valid_spawns.remove(spawn)
+        self.level=1
         self.difficulty="Easy"
-        self.player = Player(x,y,self.map)
-        self.camera = Camera(800,600)
+
+        self.camera=Camera(800,600)
         self.wall=load_image("assets/wall.png",settings.TILE_SIZE,settings.TILE_SIZE)
         self.floor=load_image("assets/floor.png",settings.TILE_SIZE,settings.TILE_SIZE)
+
         self.projectiles=[]
         self.enemies=[]
+        self.generators=[]
+
+        self.generate_level()
+
+
+        # self.map = map.game_map
+        # self.level=1
+        #
+        # self.valid_spawns=map.find_spawn(map.rooms)
+        # print(self.valid_spawns)
+        # spawn=random.choice(self.valid_spawns)
+        # x,y=spawn
+        # self.x1,self.y1=spawn
+        # self.valid_spawns.remove(spawn)
+        #
+        # self.exit_location=map.find_exit(self.valid_spawns,spawn)
+        # self.exit=Exit(self.exit_location[0],self.exit_location[1])
+        # self.valid_spawns.remove(self.exit_location)
+        #
+        #
+        #
+        # self.difficulty="Easy"
+        # self.player = Player(x,y,self.map)
+        #
+        # self.generators=[]
+        # spawns_list=self.valid_spawns.copy()
+
+
+        # self.camera = Camera(800, 600)
+        # self.wall = load_image("assets/wall.png", settings.TILE_SIZE, settings.TILE_SIZE)
+        # self.floor = load_image("assets/floor.png", settings.TILE_SIZE, settings.TILE_SIZE)
+        # self.projectiles = []
+        # self.enemies = []
+        # self.spawn_enemy()
+        # self.player.items[0] = items.Mace(self.player, self.enemies)
+        # self.player.items[1] = items.SpellBook(self.player, self.enemies,self.projectiles)
+
+    def generate_level(self):
+        self.map,self.rooms=map.generate_map(self.level)
+        self.valid_spawns=map.find_spawn(self.rooms)
+        spawn=random.choice(self.valid_spawns)
+        x,y=spawn
+        self.valid_spawns.remove(spawn)
+        if not hasattr(self,"player"):
+            self.player=Player(x,y,self.map)
+            self.player.items[0]=items.Mace(self.player,self.enemies)
+            self.player.items[1]=items.SpellBook(self.player,self.enemies,self.projectiles)
+        else:
+            self.player.map=self.map
+            self.player.x=x
+            self.player.y=y
+        self.enemies.clear()
+        self.projectiles.clear()
+        self.generators.clear()
+        self.exit_location=map.find_exit(self.valid_spawns,spawn)
+        self.exit=Exit(self.exit_location[0],self.exit_location[1])
+        self.valid_spawns.remove(self.exit_location)
+        self.spawn_generators()
         self.spawn_enemy()
-        self.player.items[0]=items.Mace(self.player,self.enemies)
-        self.player.items[1] = items.SpellBook(self.player, self.enemies,self.projectiles)
+
+    def spawn_generators(self):
+        number_generators=min(int((self.level-1)**0.5+1),len(self.valid_spawns))
+        spawns_list=self.valid_spawns.copy()
+        for i in range(number_generators):
+            if not spawns_list:
+                break
+            rand_spawn=random.choice(spawns_list)
+            x,y=rand_spawn
+            spawns_list.remove(rand_spawn)
+            if ((x - self.player.x) ** 2 + (y - self.player.y)**2) ** 0.5 >= 20 * settings.TILE_SIZE:
+                self.generators.append(Generator(x,y))
 
     def spawn_enemy(self):
-        for i in range(settings.ENEMY_COUNT):
-            spawn = random.choice(self.valid_spawns)
-            x, y = spawn
-            print(spawn)
-            self.valid_spawns.remove(spawn)
-            enemy=monster.RangeEnemy(self.x1,self.y1,self.map,"range1",self.projectiles,self.difficulty)
+        enemy_spawns=self.valid_spawns.copy()
+        print(self.valid_spawns)
+        number_enemies=int((4*self.level)**0.5+1)
+        for i in range(number_enemies):#int((4*self.level)**0.5+1)
+            if enemy_spawns:
+                spawn = random.choice(enemy_spawns)
+                x, y = spawn
+                enemy_spawns.remove(spawn)
+                enemy=monster.RangeEnemy(x,y,self.map,"range1",self.projectiles,self.difficulty)
+            else:
+                spawn = random.choice(self.valid_spawns)
+                x, y = spawn
+                enemy = monster.RangeEnemy(x, y, self.map, "range1", self.projectiles, self.difficulty)
             self.enemies.append(enemy)
 
+    def next_level(self):
+        self.level+=1
+        print(f"New Level Reached:{self.level}")
+        self.generate_level()
+
     def update(self, window):
+        if self.exit.update(self.player):
+            self.next_level()
         self.player.handle_input()
+
         for enemy in self.enemies:
             enemy.update(self.player)
             enemy.attack(self.player)
@@ -44,12 +124,21 @@ class Game:
                 self.enemies.remove(enemy)
                 self.player.progression.add_xp(enemy.xp_yield)
                 self.player.progression.add_currency(enemy.currency_yield)
+
         for projectile in self.projectiles:
             projectile.update()
             projectile.projectile_timer-=1
             if projectile.projectile_timer <= 0:
                 self.projectiles.remove(projectile)
 
+        active_gen_list=[]
+        for gen in self.generators:
+            gen.update(self.player)
+            active_gen_list.append(gen.active)
+        if all(active_gen_list):
+            self.exit.active=True
+        else:
+            self.exit.active=False
         self.camera.update(self.player)
         self.draw(window)
 
@@ -71,11 +160,16 @@ class Game:
                     else:
                         image=self.floor
                     window.blit(image,(column*settings.TILE_SIZE-self.camera.x,row*settings.TILE_SIZE-self.camera.y))#converting world coordinate to screen coordinate
+        self.exit.draw(window, self.camera)
+
+
+
         for enemy in self.enemies:
             enemy.draw(window,self.camera)
         for projectile in self.projectiles:
             projectile.draw(window,self.camera)
-
+        for gen in self.generators:
+            gen.draw(window,self.camera,self.player)
         minimap.draw(window,self.player)
         window.blit(self.player.image,(self.player.rect.x-self.camera.x,self.player.rect.y-self.camera.y))
         self.player.draw_health_bar(window)

@@ -1,11 +1,9 @@
 import random
 import settings
 
-PART_MIN_SIZE=12
+PART_MIN_SIZE=10
 ROOM_MIN_SIZE=6
-MAP_HEIGHT=60
-MAP_WIDTH=80
-game_map=[[0 for i in range(MAP_WIDTH)] for j in range(MAP_HEIGHT)] #assigns 0 to 1D list then assigns the 1D lists to MAP_HEIGHT rows
+
 
 class BSPNode:
     def __init__(self, x, y,width,height):
@@ -32,29 +30,31 @@ def split(node):
         node.right = BSPNode(node.x, node.y + split_center, node.width, node.height - split_center)
         split(node.left)
         split(node.right)
-def carve_rooms(node):
+
+def carve_rooms(node,game_map):
     if node.left or node.right :
         if node.left:
-            carve_rooms(node.left)
+            carve_rooms(node.left,game_map)
         if node.right:
-            carve_rooms(node.right)
+            carve_rooms(node.right,game_map)
         return
     room_width=random.randint(ROOM_MIN_SIZE,node.width-2)#creates rooms with boundaries so they do not overlap
     room_height=random.randint(ROOM_MIN_SIZE,node.height-2)
     room_x=random.randint(node.x+1,node.x+node.width-room_width-1)
     room_y=random.randint(node.y+1,node.y+node.height-room_height-1)
     node.room=(room_x,room_y,room_width,room_height)
-def create_room(room):#base function for room creation
+def create_room(room,game_map):#base function for room creation
     for row in range(room[1],room[1]+room[3]):
         for column in range(room[0],room[0]+room[2]):
             game_map[row][column]=1
-def create_all_rooms(node):#function to create every room in each node
+
+def create_all_rooms(node,game_map):#function to create every room in each node
     if node.room:
-        create_room(node.room)
+        create_room(node.room,game_map)
     if node.left:
-        create_all_rooms(node.left)
+        create_all_rooms(node.left,game_map)
     if node.right:
-        create_all_rooms(node.right)
+        create_all_rooms(node.right,game_map)
 def get_room(node):#returns the x,y width and height properties of teh room
     if node.room:
         return node.room
@@ -69,7 +69,7 @@ def get_room_center(room):#finds the room center as an integer using modulus div
     if room:
         return room[0]+room[2]//2,room[1]+room[3]//2
     return None
-def carve_corridor(room1,room2):
+def carve_corridor(room1,room2,game_map):
     x1,y1=get_room_center(room1)
     x2,y2=get_room_center(room2)
     for x in range(min(x1, x2), max(x1, x2) + 1):#create horizontal connection
@@ -80,17 +80,17 @@ def carve_corridor(room1,room2):
         game_map[y][x2] = 1
         game_map[y][x2+1]=1
         game_map[y][x2-1] = 1
-def connect_rooms(node):
+def connect_rooms(node,game_map):
     if node.left and node.right:
-        connect_rooms(node.left)#recursive function to interally connect each leaf node of the tree
-        connect_rooms(node.right)
+        connect_rooms(node.left,game_map)#recursive function to interally connect each leaf node of the tree
+        connect_rooms(node.right,game_map)
         room1=get_room(node.left)
         room2=get_room(node.right)
     else:
         return
 
     if room1 and room2:
-        carve_corridor(room1,room2)
+        carve_corridor(room1,room2,game_map)
 def list_rooms(node):
     rooms=[]
     if not node:
@@ -109,15 +109,30 @@ def find_spawn(rooms):
         x*=settings.TILE_SIZE
         y*=settings.TILE_SIZE
         valid_spawns.append((x,y))
-    print(valid_spawns)
+    # print(valid_spawns)
     return valid_spawns
 
-root=BSPNode(0,0,MAP_WIDTH,MAP_HEIGHT)#root node
-split(root)
-carve_rooms(root)
-create_all_rooms(root)
-connect_rooms(root)
-rooms = list_rooms(root)
+def find_exit(valid_spawns,player_spawn):
+    valid_exits=[]
+    # valid_spawns.remove(player_spawn)
+    for room in valid_spawns:
+        x,y=room
+        x*=settings.TILE_SIZE
+        y*=settings.TILE_SIZE
+        valid_exits.append(room)
+    return max(valid_exits,key=lambda pos:((pos[0]-player_spawn[0])**2+(pos[1]-player_spawn[1])**2)**0.5)
+
+def generate_map(level):
+    map_height = 50+int(level**0.5)*10
+    map_width = 50+int(level**0.5)*10
+    game_map = [[0 for i in range(map_width)] for j in range(map_height)]
+    root=BSPNode(0,0,map_width,map_height)#root node
+    split(root)
+    carve_rooms(root,game_map)
+    create_all_rooms(root,game_map)
+    connect_rooms(root,game_map)
+    rooms = list_rooms(root)
+    return game_map,rooms
 
 
 

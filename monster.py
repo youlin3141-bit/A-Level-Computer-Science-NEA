@@ -68,6 +68,10 @@ class Enemy:
             return True
         return False
     def move(self,dx,dy):
+        self.x += dx
+        self.y += dy
+        self.rect.x = round(self.x)
+        self.rect.y = round(self.y)
         # new_rect = self.rect.copy()
         # new_rect.x += dx
         # # if not self.check_collision(new_rect):
@@ -77,10 +81,7 @@ class Enemy:
         # new_rect.y += dy
         # # if not self.check_collision(new_rect):
         # self.rect.y = new_rect.y
-        self.x+=dx
-        self.y+=dy
-        self.rect.x=round(self.x)
-        self.rect.y=round(self.y)
+
 
     def update(self,player):
         if self.cooldown>0:
@@ -140,11 +141,6 @@ class Enemy:
         if self.can_see_player(player):
             self.state="chase"
             return
-        # self.search_duration-=1
-        # if self.search_duration is not None:
-        #     self.state="wander"
-        #     return
-        # print("search start")
         enemy_tile = (self.rect.centerx // settings.TILE_SIZE, self.rect.centery // settings.TILE_SIZE)
         if enemy_tile==self.last_seen:
             self.state="wander"
@@ -177,6 +173,7 @@ class Enemy:
                 self.path=astar(enemy_tile,target,self.map)
             self.wander_timer=210
         self.traverse_path(self.path)
+
     def draw(self,window,camera):
         window.blit(self.image,(self.rect.x-camera.x,self.rect.y-camera.y))
 
