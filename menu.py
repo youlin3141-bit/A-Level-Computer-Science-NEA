@@ -1,6 +1,6 @@
 import pygame
-# pygame.init()
 import pygame_gui
+
 start_game=False
 running=True
 class Page:
@@ -202,6 +202,75 @@ class CreateNewWorld(Page):
             if event.ui_element == self.difficulty_select:
                 print(f"Difficulty set to: {event.text}")
         self.manager.process_events(event)
+
+class PausePage(Page):
+    def __init__(self):
+        super().__init__()
+        self.resume_button=pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((300, 250), (250, 50)),
+            text="Resume",
+            manager=self.manager,
+        )
+        self.exit_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((300, 350), (250, 50)),
+            text="Save and Exit",
+            manager=self.manager,
+        )
+        self.page_label = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((370, 200), (100, 50)),
+            text="Game Paused",
+            manager=self.manager,
+        )
+        self.paused=True
+        self.game_active=True
+        self.back_button.hide()
+    def handle_event(self, event):
+        global active_screen
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.resume_button:
+                self.paused=False
+            if event.ui_element == self.exit_button:
+                self.game_active=False
+                active_screen=screens[0]
+        self.manager.process_events(event)
+
+class ShopPage(Page):
+    def __init__(self):
+        super().__init__()
+        self.continue_button=pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((300, 500), (250, 50)),
+            text="Continue",
+            manager=self.manager,
+        )
+        self.item1 = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((300, 200), (250, 50)),
+            text="Item1",
+            manager=self.manager,
+        )
+        self.item2 = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((300, 300), (250, 50)),
+            text="Item2",
+            manager=self.manager,
+        )
+        self.item3 = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((300, 400), (250, 50)),
+            text="Item3",
+            manager=self.manager,
+        )
+        self.page_label = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((370, 150), (100, 50)),
+            text="SHOP",
+            manager=self.manager,
+        )
+        self.continue_pressed=False
+        self.back_button.hide()
+    def handle_event(self, event):
+        global active_screen
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.continue_button:
+                self.continue_pressed=True
+        self.manager.process_events(event)
+
 main_bg=pygame.image.load('assets/main_bg.png')
 main_bg=pygame.transform.scale(main_bg,(800,600))
 main_logo=pygame.image.load('assets/main_logo.png')
@@ -212,13 +281,17 @@ login_page = LoginPage()
 register_page= RegisterPage()
 choose_world = ChooseWorld()
 create_new_world= CreateNewWorld()
+pause_page=PausePage()
+shop_page=ShopPage()
 screens=[
      main_menu,
      leaderboard,
      login_page,
      register_page,
      choose_world,
-     create_new_world
+     create_new_world,
+    pause_page,
+    shop_page,
     ]
 active_screen=screens[0]
 

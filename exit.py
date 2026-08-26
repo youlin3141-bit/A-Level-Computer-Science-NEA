@@ -29,10 +29,7 @@ class Generator:
         key = pygame.key.get_pressed()
         if self.rect.colliderect(player.rect):
             if key[pygame.K_e] and not self.e_pressed:
-                if not self.active:
-                    self.active=True
-                else:
-                    self.active=False
+                self.active= not self.active
         self.e_pressed=key[pygame.K_e]
 
     def draw(self,window,camera,player):

@@ -18,7 +18,6 @@ class Player:
                        "Damage"]
         self.damage_upgrade=0
         self.upgrade=None
-
         self.score=0
         self.items=[None,None,None]
         self.item_index=0
@@ -125,6 +124,10 @@ class Player:
         bottom = (rect.bottom-1)//settings.TILE_SIZE
         for row in range(top,bottom+1):
             for column in range(left,right+1):
+                if row<0 or row>=len(self.map):
+                    return True
+                if column<0 or column>=len(self.map[0]):
+                    return True
                 if self.map[row][column] == 0:
                     return True
         return False

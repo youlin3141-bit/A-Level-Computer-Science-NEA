@@ -106,8 +106,8 @@ def find_spawn(rooms):
     valid_spawns=[]
     for room in rooms:
         x,y=get_room_center(room)
-        x*=settings.TILE_SIZE
-        y*=settings.TILE_SIZE
+        x=x*settings.TILE_SIZE+settings.TILE_SIZE//2
+        y=y*settings.TILE_SIZE+settings.TILE_SIZE//2
         valid_spawns.append((x,y))
     # print(valid_spawns)
     return valid_spawns

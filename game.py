@@ -1,4 +1,6 @@
+import menu
 import settings
+import pygame
 from exit import Exit,Generator
 import items
 from player import Player
@@ -12,49 +14,18 @@ class Game:
     def __init__(self):
         self.level=1
         self.difficulty="Easy"
-
+        self.paused=False
+        self.open_settings=False
         self.camera=Camera(800,600)
         self.wall=load_image("assets/wall.png",settings.TILE_SIZE,settings.TILE_SIZE)
         self.floor=load_image("assets/floor.png",settings.TILE_SIZE,settings.TILE_SIZE)
 
+        self.shop_required=False
         self.projectiles=[]
         self.enemies=[]
         self.generators=[]
 
         self.generate_level()
-
-
-        # self.map = map.game_map
-        # self.level=1
-        #
-        # self.valid_spawns=map.find_spawn(map.rooms)
-        # print(self.valid_spawns)
-        # spawn=random.choice(self.valid_spawns)
-        # x,y=spawn
-        # self.x1,self.y1=spawn
-        # self.valid_spawns.remove(spawn)
-        #
-        # self.exit_location=map.find_exit(self.valid_spawns,spawn)
-        # self.exit=Exit(self.exit_location[0],self.exit_location[1])
-        # self.valid_spawns.remove(self.exit_location)
-        #
-        #
-        #
-        # self.difficulty="Easy"
-        # self.player = Player(x,y,self.map)
-        #
-        # self.generators=[]
-        # spawns_list=self.valid_spawns.copy()
-
-
-        # self.camera = Camera(800, 600)
-        # self.wall = load_image("assets/wall.png", settings.TILE_SIZE, settings.TILE_SIZE)
-        # self.floor = load_image("assets/floor.png", settings.TILE_SIZE, settings.TILE_SIZE)
-        # self.projectiles = []
-        # self.enemies = []
-        # self.spawn_enemy()
-        # self.player.items[0] = items.Mace(self.player, self.enemies)
-        # self.player.items[1] = items.SpellBook(self.player, self.enemies,self.projectiles)
 
     def generate_level(self):
         self.map,self.rooms=map.generate_map(self.level)
@@ -70,6 +41,7 @@ class Game:
             self.player.map=self.map
             self.player.x=x
             self.player.y=y
+        self.player.rect.center=spawn
         self.enemies.clear()
         self.projectiles.clear()
         self.generators.clear()
@@ -107,39 +79,55 @@ class Game:
                 enemy = monster.RangeEnemy(x, y, self.map, "range1", self.projectiles, self.difficulty)
             self.enemies.append(enemy)
 
+    def handle_event(self,event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.paused=not self.paused
+                if self.paused:
+                    menu.active_screen=menu.screens[6]
+                    menu.screens[6].paused=True
+                else:
+                    menu.screens[6].paused = False
+
+
     def next_level(self):
+        completed_level=self.level
         self.level+=1
         print(f"New Level Reached:{self.level}")
+        if completed_level%3==0:
+            self.shop_required=True
+            return
         self.generate_level()
 
     def update(self, window):
-        if self.exit.update(self.player):
-            self.next_level()
-        self.player.handle_input()
+        if not self.paused and not self.shop_required:
+            if self.exit.update(self.player):
+                self.next_level()
+            self.player.handle_input()
 
-        for enemy in self.enemies:
-            enemy.update(self.player)
-            enemy.attack(self.player)
-            if enemy.health <= 0:
-                self.enemies.remove(enemy)
-                self.player.progression.add_xp(enemy.xp_yield)
-                self.player.progression.add_currency(enemy.currency_yield)
+            for enemy in self.enemies:
+                enemy.update(self.player)
+                enemy.attack(self.player)
+                if enemy.health <= 0:
+                    self.enemies.remove(enemy)
+                    self.player.progression.add_xp(enemy.xp_yield)
+                    self.player.progression.add_currency(enemy.currency_yield)
 
-        for projectile in self.projectiles:
-            projectile.update()
-            projectile.projectile_timer-=1
-            if projectile.projectile_timer <= 0:
-                self.projectiles.remove(projectile)
+            for projectile in self.projectiles:
+                projectile.update()
+                projectile.projectile_timer-=1
+                if projectile.projectile_timer <= 0:
+                    self.projectiles.remove(projectile)
 
-        active_gen_list=[]
-        for gen in self.generators:
-            gen.update(self.player)
-            active_gen_list.append(gen.active)
-        if all(active_gen_list):
-            self.exit.active=True
-        else:
-            self.exit.active=False
-        self.camera.update(self.player)
+            active_gen_list=[]
+            for gen in self.generators:
+                gen.update(self.player)
+                active_gen_list.append(gen.active)
+            if all(active_gen_list):
+                self.exit.active=True
+            else:
+                self.exit.active=False
+            self.camera.update(self.player)
         self.draw(window)
 
     def draw(self,window):
@@ -179,4 +167,5 @@ class Game:
         self.player.draw_upgrade(window)
         if self.player.current_item: # to be removed
             self.player.current_item.draw_hitbox(window, self.camera)
+        #self.next_level()#DO NOT RUn
 

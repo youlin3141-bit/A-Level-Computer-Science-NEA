@@ -17,12 +17,34 @@ while menu.running:
             menu.running = False
         if not game:    #if game does not exist, then handle the menu
             menu.active_screen.handle_event(event)
+        else:
+            game.handle_event(event)
+            if game.paused:
+                menu.screens[6].handle_event(event)
+                game.paused=menu.screens[6].paused
+                if not menu.screens[6].game_active:
+                    game=None
+            elif game.shop_required:
+                shop=menu.screens[7]
+                shop.handle_event(event)
+                if shop.continue_pressed:
+                    game.shop_required=False
+                    shop.continue_pressed=False
+                    game.generate_level()
+
     if not game:
         menu.active_screen.update(time_delta,window)
         if menu.start_game:
             game=Game()
+            menu.start_game=False
+            menu.screens[6].game_active=True
+            menu.screens[6].paused=True
     else:
         game.update(window)
+        if game.paused and menu.screens[6].paused:
+            menu.screens[6].update(time_delta,window)
+        elif game.shop_required:
+            menu.screens[7].update(time_delta,window)
     pygame.display.update()
 
 pygame.quit()
