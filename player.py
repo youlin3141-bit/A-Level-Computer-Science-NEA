@@ -131,6 +131,28 @@ class Player:
                 if self.map[row][column] == 0:
                     return True
         return False
+    def add_item(self, item):
+        for i in range(len(self.items)):
+            if not self.items[i]:
+                self.items[i]=item
+                return True
+        return False
+    def apply_upgrade(self,upgrade):
+        if upgrade=="Speed":
+            self.speed+=0.5
+        if upgrade=="Max Health":
+            self.max_health+=10
+            self.health+=10
+        if upgrade=="Damage":
+            self.damage_upgrade+=2
+        if upgrade=="Heal 25":
+            self.health=min(self.health+25,self.max_health)
+        if upgrade == "Heal 50":
+            self.health = min(self.health + 50, self.max_health)
+        if upgrade == "Heal 100":
+            self.health = min(self.health + 100, self.max_health)
+        if upgrade=="Heal 200":
+            self.health=min(self.health+200,self.max_health)
     def handle_input(self):
         key = pygame.key.get_pressed()#returns list of bool
         mouse=pygame.mouse.get_pressed()

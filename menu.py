@@ -1,6 +1,7 @@
 import pygame
 import pygame_gui
-
+import settings
+import random
 start_game=False
 running=True
 class Page:
@@ -35,7 +36,7 @@ class MainMenu(Page):
             manager=self.manager,
         )
         self.back_button.set_text("Exit")
-        self.test_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((600, 400), (200, 50)), text='Test',manager=self.manager)
+        self.test_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((600, 400), (200, 50)), text='Play (demo)',manager=self.manager)
 
     def handle_event(self,event):
         global running
@@ -238,38 +239,64 @@ class ShopPage(Page):
     def __init__(self):
         super().__init__()
         self.continue_button=pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((300, 500), (250, 50)),
+            relative_rect=pygame.Rect((275, 400), (250, 50)),
             text="Continue",
             manager=self.manager,
         )
         self.item1 = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((300, 200), (250, 50)),
+            relative_rect=pygame.Rect((275, 170), (250, 50)),
             text="Item1",
             manager=self.manager,
         )
         self.item2 = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((300, 300), (250, 50)),
+            relative_rect=pygame.Rect((275, 230), (250, 50)),
             text="Item2",
             manager=self.manager,
         )
         self.item3 = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((300, 400), (250, 50)),
+            relative_rect=pygame.Rect((275, 290), (250, 50)),
             text="Item3",
             manager=self.manager,
         )
         self.page_label = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((370, 150), (100, 50)),
+            relative_rect=pygame.Rect((350, 130), (100, 50)),
             text="SHOP",
             manager=self.manager,
         )
         self.continue_pressed=False
         self.back_button.hide()
+        self.shop_items=[]
+        self.selected_item=None
+    def set_items(self,items):
+        self.shop_items=items
+        # print(items)
+        price2=settings.SHOP_ITEMS["upgrades"].get(self.shop_items[1])
+        price3 = settings.SHOP_ITEMS["upgrades"].get(self.shop_items[2])
+        if self.shop_items[0]in settings.SHOP_ITEMS["items"]:
+            price1=settings.SHOP_ITEMS["items"].get(self.shop_items[0])
+        elif self.shop_items[0]in settings.SHOP_ITEMS["upgrades"]:
+            price1=settings.SHOP_ITEMS["upgrades"].get(self.shop_items[0])
+        self.item2.set_text(f"{self.shop_items[1]}     Price: {price2}")
+        self.item3.set_text(f"{self.shop_items[2]}     Price: {price3}")
+        self.item1.set_text(f"{self.shop_items[0]}     Price: {price1}")
     def handle_event(self, event):
-        global active_screen
+        self.manager.process_events(event)
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.continue_button:
                 self.continue_pressed=True
-        self.manager.process_events(event)
+                self.item1.show()
+                self.item2.show()
+                self.item3.show()
+            if event.ui_element == self.item1:
+                self.selected_item=self.shop_items[0]
+                self.item1.hide()
+            if event.ui_element == self.item2:
+                self.selected_item=self.shop_items[1]
+                self.item2.hide()
+            if event.ui_element == self.item3:
+                self.selected_item=self.shop_items[2]
+                self.item3.hide()
+
 
 main_bg=pygame.image.load('assets/main_bg.png')
 main_bg=pygame.transform.scale(main_bg,(800,600))

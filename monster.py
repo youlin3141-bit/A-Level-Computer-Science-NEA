@@ -21,38 +21,31 @@ class Enemy:
         self.cooldown=0
         self.enemy_type=enemy_type
 
-        stats=settings.ENEMY_TYPES[enemy_type]
-        stats_difficulty=settings.DIFFICULTY[difficulty]
+        self.stats=settings.ENEMY_TYPES[enemy_type]
+        self.stats_difficulty=settings.DIFFICULTY[difficulty]
 
-        self.health=stats["health"]*stats_difficulty["stats_multiplier"]
-        self.speed=stats["speed"]*stats_difficulty["speed_multiplier"]
-        self.damage=stats["damage"]*stats_difficulty["stats_multiplier"]
+        self.health=self.stats["health"]*self.stats_difficulty["stats_multiplier"]
+        self.speed=self.stats["speed"]*self.stats_difficulty["speed_multiplier"]
+        self.damage=self.stats["damage"]*self.stats_difficulty["stats_multiplier"]
 
-        self.rect=pygame.Rect(x,y,stats["width"],stats["height"])
-        self.image=load_image(stats["image"],stats["width"],stats["height"])
-        self.view_radius=stats["view_radius"]
-        self.currency_yield=stats["currency_yield"]
-        self.xp_yield=stats["xp_yield"]*stats_difficulty["xp_multiplier"]
-
+        self.rect=pygame.Rect(x,y,self.stats["width"],self.stats["height"])
+        self.image=load_image(self.stats["image"],self.stats["width"],self.stats["height"])
+        self.view_radius=self.stats["view_radius"]
+        self.currency_yield=self.stats["currency_yield"]
+        self.xp_yield=self.stats["xp_yield"]*self.stats_difficulty["xp_multiplier"]
+        self.damage_flash_timer=0
+        self.damaged_image=load_image(self.stats["damaged_image"],self.stats["width"],self.stats["height"])
+        self.image=load_image(self.stats["image"],self.stats["width"],self.stats["height"])
         self.state="wander"
-    # def check_collision(self, rect):
-    #     left = rect.left//settings.TILE_SIZE
-    #     right = (rect.right-1)//settings.TILE_SIZE  # occupies 0-31 tiles hence the -1
-    #     top = rect.top//settings.TILE_SIZE
-    #     bottom = (rect.bottom-1)//settings.TILE_SIZE
-    #     for row in range(top,bottom+1):
-    #         for column in range(left,right+1):
-    #             if self.map[row][column] == 0:
-    #                 return True
-    #     return False
     def take_damage(self,damage):
         if self.immunity_frames<=0:
             self.health-=damage
+            self.damage_flash_timer=10
             print(f"enemy new health:{self.health}")
             if self.health<=0:
                 self.health=0
             self.immunity_frames=30
-            return
+            self.damage_flash_timer=10
         return
     def can_see_player(self,player):
         distance = pygame.Vector2(self.rect.center).distance_to(player.rect.center)  # builtin vector methods to calc distance
@@ -72,18 +65,9 @@ class Enemy:
         self.y += dy
         self.rect.x = round(self.x)
         self.rect.y = round(self.y)
-        # new_rect = self.rect.copy()
-        # new_rect.x += dx
-        # # if not self.check_collision(new_rect):
-        # self.rect.x = new_rect.x
-        #
-        # new_rect = self.rect.copy()
-        # new_rect.y += dy
-        # # if not self.check_collision(new_rect):
-        # self.rect.y = new_rect.y
-
-
     def update(self,player):
+        if self.damage_flash_timer>0:
+            self.damage_flash_timer-=1
         if self.cooldown>0:
             self.cooldown-=1
         if self.state=="wander":
@@ -111,10 +95,6 @@ class Enemy:
             self.rect.y=round(self.y)
             self.path.pop(0)
             return
-        # print(direction.length())
-        # if 0 < direction.length() < settings.TILE_SIZE/math.sqrt(2):#sqrt(2(32*2)^2)=sqrt()
-        #      self.move(direction.x, direction.y)
-        #      print("moving less than max speed")
         if direction.length() > 0:  # pythagoras here
             direction = direction.normalize()
             self.move(direction.x * self.speed, direction.y * self.speed)
@@ -175,7 +155,11 @@ class Enemy:
         self.traverse_path(self.path)
 
     def draw(self,window,camera):
-        window.blit(self.image,(self.rect.x-camera.x,self.rect.y-camera.y))
+        if self.damage_flash_timer>0:
+            image=self.damaged_image
+        else:
+            image=self.image
+        window.blit(image,(self.rect.x-camera.x,self.rect.y-camera.y))
 
 class MeleeEnemy(Enemy):
     def attack(self,player):

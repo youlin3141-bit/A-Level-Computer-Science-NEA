@@ -31,7 +31,6 @@ while menu.running:
                     game.shop_required=False
                     shop.continue_pressed=False
                     game.generate_level()
-
     if not game:
         menu.active_screen.update(time_delta,window)
         if menu.start_game:
@@ -45,6 +44,15 @@ while menu.running:
             menu.screens[6].update(time_delta,window)
         elif game.shop_required:
             menu.screens[7].update(time_delta,window)
+            menu.screens[7].set_items(game.shop_items)
+            if menu.screens[7].selected_item:
+                game.buy_shop_item(menu.screens[7].selected_item)
+                menu.screens[7].selected_item=None
+            game.player.draw_health_bar(window)
+            game.player.draw_xp(window)
+            game.player.draw_currency(window)
+            game.player.draw_inventory(window)
+
     pygame.display.update()
 
 pygame.quit()

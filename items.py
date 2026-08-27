@@ -31,7 +31,7 @@ class Mace(Items):
     def __init__(self,player,enemies):
         self.player = player
         self.enemies=enemies
-        self.damage=30+self.player.damage_upgrade
+        self.damage=20
         super().__init__("Mace",
                          self.damage,
                          load_image("assets/mace.png",60,60),0)
@@ -51,7 +51,7 @@ class Mace(Items):
             print(f"melee attack")
             for enemy in self.enemies:
                 if enemy.rect.colliderect(self.get_hitbox()):
-                    enemy.take_damage(self.damage)
+                    enemy.take_damage(self.damage+self.player.damage_upgrade)
             self.cooldown = 30
 
 class SpellBook(Items):
@@ -61,7 +61,7 @@ class SpellBook(Items):
         self.projectiles=[]
         self.directions=[]
         self.projectiles_list=projectiles_list
-        self.damage=10+self.player.damage_upgrade
+        self.damage=10
         super().__init__("SpellBook",
                          self.damage,
                          load_image("assets/spellbook.png",60,60),0)
@@ -80,7 +80,8 @@ class SpellBook(Items):
                                                 2,10,
                                                 "assets/spellbookprojectile.png",
                                                 direction,
-                                                self.enemies)
+                                                self.enemies,
+                                                self.player.damage_upgrade)
                     self.projectiles.append(new_proj)
                     self.projectiles_list.append(new_proj)
             self.cooldown = 30

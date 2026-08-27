@@ -14,10 +14,11 @@ class Projectile:
 
 
 class PlayerProjectile(Projectile):
-    def __init__(self,x,y,speed,damage,projectile_image,direction,enemies):
+    def __init__(self,x,y,speed,damage,projectile_image,direction,enemies,damage_upgrade):
         super().__init__(x,y,speed,damage)
         self.image=load_image(projectile_image,10,10)
         self.direction=direction.normalize()
+        self.damage_upgrade=damage_upgrade
         self.enemies=enemies
     def update(self):
         self.x+=self.direction.x* self.speed
@@ -25,7 +26,7 @@ class PlayerProjectile(Projectile):
         self.rect.center=round(self.x),round(self.y)
         for enemy in self.enemies:
             if self.rect.colliderect(enemy.rect):
-                enemy.take_damage(self.damage)
+                enemy.take_damage(self.damage+self.damage_upgrade)
     def get_hitbox(self,):
         return pygame.Rect(
             self.rect.x,

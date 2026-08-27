@@ -36,7 +36,7 @@ class Game:
         if not hasattr(self,"player"):
             self.player=Player(x,y,self.map)
             self.player.items[0]=items.Mace(self.player,self.enemies)
-            self.player.items[1]=items.SpellBook(self.player,self.enemies,self.projectiles)
+            # self.player.items[1]=items.SpellBook(self.player,self.enemies,self.projectiles)
         else:
             self.player.map=self.map
             self.player.x=x
@@ -72,12 +72,15 @@ class Game:
                 spawn = random.choice(enemy_spawns)
                 x, y = spawn
                 enemy_spawns.remove(spawn)
-                enemy=monster.RangeEnemy(x,y,self.map,"range1",self.projectiles,self.difficulty)
+                range_enemy = monster.RangeEnemy(x, y, self.map, "range1", self.projectiles, self.difficulty)
+                melee_enemy = monster.MeleeEnemy(x, y, self.map, "melee1", self.difficulty)
             else:
                 spawn = random.choice(self.valid_spawns)
                 x, y = spawn
-                enemy = monster.RangeEnemy(x, y, self.map, "range1", self.projectiles, self.difficulty)
-            self.enemies.append(enemy)
+                range_enemy = monster.RangeEnemy(x, y, self.map, "range1", self.projectiles, self.difficulty)
+                melee_enemy=monster.MeleeEnemy(x,y,self.map,"melee1",self.difficulty)
+            enemies = [range_enemy, melee_enemy]
+            self.enemies.append(random.choice(enemies))
 
     def handle_event(self,event):
         if event.type == pygame.KEYDOWN:
@@ -96,8 +99,44 @@ class Game:
         print(f"New Level Reached:{self.level}")
         if completed_level%3==0:
             self.shop_required=True
+            self.generate_shop()
             return
         self.generate_level()
+
+    def generate_shop(self):
+        available_items=[]
+        for item in settings.SHOP_ITEMS["items"]:
+            if not self.player_has_item(item):
+                available_items.append(item)
+        available_upgrades=list(settings.SHOP_ITEMS["upgrades"].keys())
+        if available_items:
+            self.shop_items=[random.choice(available_items)]+ [random.choice(available_upgrades),random.choice(available_upgrades)]
+        else:
+            self.shop_items=[random.choice(available_upgrades),random.choice(available_upgrades),random.choice(available_upgrades)]
+
+    def player_has_item(self,target_item):
+        for item in self.player.items:
+            if item and item.name==target_item:
+                return True
+        return False
+    def buy_shop_item(self,item_name):
+        if item_name in settings.SHOP_ITEMS["items"]:
+            item=None
+            price=settings.SHOP_ITEMS["items"][item_name]
+            if self.player.progression.currency<price:
+                print("Not Enough Coins")
+            if item_name=="Mace":
+                item=items.Mace(self.player,self.enemies)
+            elif item_name=="Spellbook":
+                item=items.SpellBook(self.player,self.enemies,self.projectiles)
+            if item:
+                if self.player.add_item(item):
+                    self.player.progression.currency-=price
+        elif item_name in settings.SHOP_ITEMS["upgrades"]:
+            price=settings.SHOP_ITEMS["upgrades"][item_name]
+            if self.player.progression.currency>=price:
+                self.player.progression.currency-=price
+                self.player.apply_upgrade(item_name)
 
     def update(self, window):
         if not self.paused and not self.shop_required:
@@ -126,7 +165,7 @@ class Game:
             if all(active_gen_list):
                 self.exit.active=True
             else:
-                self.exit.active=False
+                self.exit.active=False#ISUNNNOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
             self.camera.update(self.player)
         self.draw(window)
 
@@ -137,9 +176,6 @@ class Game:
         first_row=self.camera.y//settings.TILE_SIZE
         last_row=first_row + 600 // settings.TILE_SIZE + 2
         minimap=Minimap(self.map,settings.TILE_SIZE)
-
-        # print(first_column, last_column)
-        # print(first_row, last_row)
         for row in range(first_row,last_row):
             for column in range(first_column,last_column):
                 if 0<=column<len(self.map[0]) and 0<=row<len(self.map):#for a 2D list, len(list) returns rows and len(list[0]) returns columns
