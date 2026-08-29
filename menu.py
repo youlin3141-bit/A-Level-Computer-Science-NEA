@@ -1,7 +1,8 @@
 import pygame
 import pygame_gui
 import settings
-import random
+from image import load_image
+import database
 start_game=False
 running=True
 class Page:
@@ -36,7 +37,7 @@ class MainMenu(Page):
             manager=self.manager,
         )
         self.back_button.set_text("Exit")
-        self.test_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((600, 400), (200, 50)), text='Play (demo)',manager=self.manager)
+        # self.test_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((600, 400), (200, 50)), text='Play (demo)',manager=self.manager)
 
     def handle_event(self,event):
         global running
@@ -46,8 +47,8 @@ class MainMenu(Page):
                 update_screen(2)
             if event.ui_element ==self.leaderboard_button:
                 update_screen(1)
-            if event.ui_element ==self.test_button:
-                start_game = True
+            # if event.ui_element ==self.test_button:
+            #     start_game = True
             if event.ui_element ==self.back_button:#
                 running=False
         self.manager.process_events(event)
@@ -91,14 +92,18 @@ class LoginPage(Page):
             manager=self.manager
         )
         self.password_box.set_text_hidden(True)
+        self.player_id=None
     def handle_event(self, event):
-        
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.enter:
+                username=self.username_box.get_text()
+                password=self.password_box.get_text()
+                player_id=database.login(username, password)
                 self.username_box.set_text("")
                 self.password_box.set_text("")
-                print(f"No account matches these credentials")
-                update_screen(4)
+                if player_id:
+                    update_screen(4)
+                    self.player_id=player_id
             if event.ui_element == self.register_button:
                 update_screen(3)
             if event.ui_element == self.back_button:
@@ -133,14 +138,28 @@ class RegisterPage(Page):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.back_button:
                 update_screen(2)
+            if event.ui_element==self.enter:
+                username=self.username_box.get_text()
+                password=self.password_box.get_text()
+                confirm_password=self.confirm_password_box.get_text()
+                database.create_player(username, password, confirm_password)
+                data= database.display_players()
+                print(database.display_game())
+                print(data)
         self.manager.process_events(event)
 
 class ChooseWorld(Page):
     def __init__(self):
         super().__init__()
         self.page_label.set_text("Choose World")
+
         self.current_account = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((300, 200), (150, 150)),
+            relative_rect=pygame.Rect((300, 300), (150, 150)),
+            text=f"Logged in as:",
+            manager=self.manager
+        )
+        self.record_current_account = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((580, 200), (200, 150)),
             text=f"Logged in as:",
             manager=self.manager
         )
@@ -154,23 +173,52 @@ class ChooseWorld(Page):
             text="Play",
             manager=self.manager,
         )
+        self.worlds = []
         self.world_save_select=pygame_gui.elements.UIDropDownMenu(
-            relative_rect=pygame.Rect((300, 400), (150, 50)),
-            options_list=["World Save1","World Save2","World Save3","a","b","c","d","e"],
-            starting_option="World Save1",
+            relative_rect=pygame.Rect((220, 400), (230, 50)),
+            options_list=[""],
+            starting_option="",
             manager=self.manager,)
-        self.save="World Save1"
+        self.player_id = None
+        self.world_id=None
+        self.world_selected=False
+        self.world_ids=[]
         self.back_button.set_text("Logout")
+    def set_player(self,player_id):
+        self.player_id=player_id
+        self.world_ids=database.get_player_worlds(player_id)
+        self.current_account.set_text(f"Logged in as {database.get_username(self.player_id)[0]}")
+        self.set_worlds()
+    def set_worlds(self):
+        data = database.load_all_games(self.player_id)
+        self.worlds=[]
+        self.world_ids=[]
+        self.world_ids=database.get_player_worlds(self.player_id)
+        for i in range(database.count_games(self.player_id)):
+            self.worlds.append(f"Save {i+1} - LVL {data[i][4]} - {data[i][1]}")
+        self.world_save_select.kill()
+        if self.worlds:
+            options=self.worlds
+            self.record_current_account.set_text(f"Highest Level: {database.get_highest_level(self.player_id)}")
+        else:
+            options=["Empty"]
+            self.record_current_account.set_text(f"Highest Level: None")
+        self.world_save_select = pygame_gui.elements.UIDropDownMenu(
+            relative_rect=pygame.Rect((220, 400), (230, 50)),
+            options_list=options,
+            starting_option=options[0],
+            manager=self.manager, )
     def handle_event(self, event):
-        if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
-            if event.ui_element == self.world_save_select:
-                self.save = event.text
-                print(f"World selected: {self.save}")
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.new_world_button:
                 update_screen(5)
             if event.ui_element == self.play_world:
-                print(f"Opening World: {self.save}")
+                if self.worlds:
+                    index=self.worlds.index(self.world_save_select.selected_option)
+                    self.world_id=self.world_ids[index]
+                    self.world_selected=True
+                else:
+                    pass
             if event.ui_element == self.back_button:
                 update_screen(2)
         self.manager.process_events(event)
@@ -178,31 +226,30 @@ class ChooseWorld(Page):
 class CreateNewWorld(Page):
     def __init__(self):
         super().__init__()
+        self.difficulty="Easy"
+        self.create_pressed=False
         self.page_label.set_text("Create New World")
         self.difficulty_select = pygame_gui.elements.UIDropDownMenu(
-            relative_rect=pygame.Rect((280, 400), (150, 50)),
-            options_list=["Easy", "Medium", "Hard", "Hardcore"],
+            relative_rect=pygame.Rect((340, 400), (150, 50)),
+            options_list=["Easy", "Normal", "Hard",],
             starting_option="Easy",
             manager=self.manager
         )
-        self.difficulty_stats = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((450, 350), (150, 150)),
-            text=f"Number of lives:",
-            manager=self.manager
-        )
-        self.create_world = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((330, 470), (150, 50)),
+        self.create_world = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((290, 470), (250, 50)),
                                                          text='Create World',
                                                          manager=self.manager)
     def handle_event(self, event):
+        self.manager.process_events(event)
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.create_world:
+                self.difficulty=self.difficulty_select.selected_option
+                self.create_pressed=True
                 print(f"World created")
             if event.ui_element == self.back_button:
                 update_screen(4)
         if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
             if event.ui_element == self.difficulty_select:
                 print(f"Difficulty set to: {event.text}")
-        self.manager.process_events(event)
 
 class PausePage(Page):
     def __init__(self):
@@ -296,12 +343,32 @@ class ShopPage(Page):
             if event.ui_element == self.item3:
                 self.selected_item=self.shop_items[2]
                 self.item3.hide()
+class DeathPage(Page):
+    def __init__(self):
+        super().__init__()
+        self.continue_button=pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((300, 400), (250, 100)),
+            text="Quit to Menu",
+            manager=self.manager,
+        )
+        self.back_button.hide()
+    def handle_event(self, event):
+        self.manager.process_events(event)
+        if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == self.continue_button:
+                update_screen(4)
+    def update(self, time_delta, window):
+        window.blit(main_bg, (0, 0))#block image transfer, set 1 image onto another
+        window.blit(main_logo, (250, 50))
+        window.blit(death_logo, (250, 100))
+        self.manager.update(time_delta)
+        self.manager.draw_ui(window)
 
 
-main_bg=pygame.image.load('assets/main_bg.png')
-main_bg=pygame.transform.scale(main_bg,(800,600))
-main_logo=pygame.image.load('assets/main_logo.png')
-main_logo=pygame.transform.scale(main_logo,(300,100))
+
+main_bg=load_image("assets/main_bg.png",800,600)
+main_logo=load_image('assets/main_logo.png',300,100)
+death_logo=load_image("assets/death_logo.png",300,300)
 main_menu = MainMenu()
 leaderboard = Leaderboard()
 login_page = LoginPage()
@@ -310,6 +377,7 @@ choose_world = ChooseWorld()
 create_new_world= CreateNewWorld()
 pause_page=PausePage()
 shop_page=ShopPage()
+death_page=DeathPage()
 screens=[
      main_menu,
      leaderboard,
@@ -319,11 +387,11 @@ screens=[
      create_new_world,
     pause_page,
     shop_page,
+    death_page,
     ]
 active_screen=screens[0]
 
 def update_screen(index):
-    """updates screen to given index"""
     global active_screen
     active_screen=screens[index]
     

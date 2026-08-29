@@ -7,6 +7,7 @@ class Items:
         self.damage=damage
         self.image=image
         self.cooldown=cooldown
+        self.flash_timer=0
     def use(self):
         pass
     def update(self):#
@@ -46,13 +47,16 @@ class Mace(Items):
 
     def use(self):
         if self.cooldown>0:
-            return
+            return False
         if self.cooldown<=0:
             print(f"melee attack")
+            self.flash_timer=5
             for enemy in self.enemies:
                 if enemy.rect.colliderect(self.get_hitbox()):
                     enemy.take_damage(self.damage+self.player.damage_upgrade)
             self.cooldown = 30
+            return True
+        return False
 
 class SpellBook(Items):
     def __init__(self,player,enemies,projectiles_list):

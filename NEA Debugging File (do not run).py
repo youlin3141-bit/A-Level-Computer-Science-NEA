@@ -15,5 +15,6 @@ import random
 # list=[]
 # list+=a+b+c
 # print(list)
-a="Mace" in settings.SHOP_ITEMS["upgrades"]
-print (settings.SHOP_ITEMS["items"].get("Damage"))
+# a="Mace" in settings.SHOP_ITEMS["upgrades"]
+# print (settings.SHOP_ITEMS["items"].get("Damage"))
+print(int(True))

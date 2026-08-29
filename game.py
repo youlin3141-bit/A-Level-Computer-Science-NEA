@@ -7,26 +7,53 @@ from player import Player
 from camera import Camera
 from minimap import Minimap
 from image import load_image
+import database
 import monster
 import map
 import random
 class Game:
-    def __init__(self):
-        self.level=1
-        self.difficulty="Easy"
-        self.paused=False
-        self.open_settings=False
-        self.camera=Camera(800,600)
-        self.wall=load_image("assets/wall.png",settings.TILE_SIZE,settings.TILE_SIZE)
-        self.floor=load_image("assets/floor.png",settings.TILE_SIZE,settings.TILE_SIZE)
+    def __init__(self,player_id,world_id,difficulty=None,data=None):
+        self.player_id = player_id
+        self.world_id = world_id
+        self.camera = Camera(800, 600)
+        self.wall = load_image("assets/wall.png", settings.TILE_SIZE, settings.TILE_SIZE)
+        self.floor = load_image("assets/floor.png", settings.TILE_SIZE, settings.TILE_SIZE)
 
-        self.shop_required=False
-        self.projectiles=[]
-        self.enemies=[]
-        self.generators=[]
+        self.shop_required = False
+        self.projectiles = []
+        self.enemies = []
+        self.generators = []
+        self.paused = False
+        self.has_mace=1
+        self.has_spellbook=0
+        self.game_over=False
 
-        self.generate_level()
-
+        if not data:
+            self.level=1
+            self.difficulty=difficulty
+            self.generate_level()
+        else:
+            (
+                player_level,
+                self.difficulty,
+                currency,
+                xp,
+                self.level,
+                speed,
+                damage_upgrade,
+                health,
+                max_health,
+                self.has_mace,
+                self.has_spellbook,
+            )=data
+            self.generate_level()
+            self.player.progression.level=player_level
+            self.player.progression.currency=currency
+            self.player.progression.xp=xp
+            self.player.speed=speed
+            self.player.damage_upgrade=damage_upgrade
+            self.player.health=health
+            self.player.max_health=max_health
     def generate_level(self):
         self.map,self.rooms=map.generate_map(self.level)
         self.valid_spawns=map.find_spawn(self.rooms)
@@ -35,13 +62,16 @@ class Game:
         self.valid_spawns.remove(spawn)
         if not hasattr(self,"player"):
             self.player=Player(x,y,self.map)
-            self.player.items[0]=items.Mace(self.player,self.enemies)
-            # self.player.items[1]=items.SpellBook(self.player,self.enemies,self.projectiles)
+            if self.has_mace:
+                self.player.items[0] = items.Mace(self.player, self.enemies)
+            if self.has_spellbook:
+                self.player.items[1] = items.SpellBook(self.player, self.enemies, self.projectiles)
         else:
             self.player.map=self.map
             self.player.x=x
             self.player.y=y
-        self.player.rect.center=spawn
+
+        self.player.rect.center = spawn
         self.enemies.clear()
         self.projectiles.clear()
         self.generators.clear()
@@ -102,6 +132,7 @@ class Game:
             self.generate_shop()
             return
         self.generate_level()
+        database.save_game(self)
 
     def generate_shop(self):
         available_items=[]
@@ -126,11 +157,18 @@ class Game:
             if self.player.progression.currency<price:
                 print("Not Enough Coins")
             if item_name=="Mace":
+                self.has_mace = 1
                 item=items.Mace(self.player,self.enemies)
-            elif item_name=="Spellbook":
+            elif item_name=="SpellBook":
+                self.has_spellbook = 1
                 item=items.SpellBook(self.player,self.enemies,self.projectiles)
             if item:
                 if self.player.add_item(item):
+                    if item_name=="Mace":
+                        self.has_mace=1
+                    elif item_name=="SpellBook":
+                        self.has_spellbook=1
+                        print(self.has_spellbook)
                     self.player.progression.currency-=price
         elif item_name in settings.SHOP_ITEMS["upgrades"]:
             price=settings.SHOP_ITEMS["upgrades"][item_name]
@@ -139,6 +177,9 @@ class Game:
                 self.player.apply_upgrade(item_name)
 
     def update(self, window):
+        if self.player.health<=0:
+            self.player_dies()
+            return
         if not self.paused and not self.shop_required:
             if self.exit.update(self.player):
                 self.next_level()
@@ -168,6 +209,10 @@ class Game:
                 self.exit.active=False#ISUNNNOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
             self.camera.update(self.player)
         self.draw(window)
+    def player_dies(self):
+        database.highest_level(self)
+        database.delete_worlds(self.world_id)
+        self.game_over=True
 
     def draw(self,window):
         window.fill((0,0,0))
@@ -201,7 +246,12 @@ class Game:
         self.player.draw_xp(window)
         self.player.draw_currency(window)
         self.player.draw_upgrade(window)
-        if self.player.current_item: # to be removed
-            self.player.current_item.draw_hitbox(window, self.camera)
+        if self.player.current_item=="Mace":
+            if self.player.current_item.use(): # to be removed
+                self.player.current_item.flash_timer=5
+        if self.player.current_item:
+            if self.player.current_item.flash_timer>0:
+                self.player.current_item.draw_hitbox(window,self.camera)
+                self.player.current_item.flash_timer-=1
         #self.next_level()#DO NOT RUn
 

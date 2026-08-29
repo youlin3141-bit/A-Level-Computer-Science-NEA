@@ -3,6 +3,7 @@ from image import load_image
 import random
 from progression import Progression
 import settings
+import database
 PLAYER_SIZE=48
 SPEED=10
 class Player:
@@ -38,15 +39,13 @@ class Player:
         self.player_up_left=load_image( "assets/player_up_left.png",PLAYER_SIZE,PLAYER_SIZE)
         self.image=self.player_down
     def take_damage(self, damage):
-        self.immunity_frames-=1
-        if self.immunity_frames<0:
+        if self.immunity_frames<=0:
             self.immunity_frames = 30
             if self.health-damage > 0:
                 self.health-=damage
                 return
             else:
                 self.health=0
-                #you died!
                 return
     def draw_health_bar(self,window):
         if self.health<0:
@@ -154,6 +153,8 @@ class Player:
         if upgrade=="Heal 200":
             self.health=min(self.health+200,self.max_health)
     def handle_input(self):
+        if self.immunity_frames>0:
+            self.immunity_frames-=1
         key = pygame.key.get_pressed()#returns list of bool
         mouse=pygame.mouse.get_pressed()
         direction = [

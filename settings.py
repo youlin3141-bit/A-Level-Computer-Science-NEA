@@ -10,7 +10,7 @@ ENEMY_TYPES={
         "view_radius":350,
         "image":"assets/melee1.png",
         "damaged_image":"assets/damaged_melee1.png",
-        "xp_yield":25,
+        "xp_yield":80,
         "currency_yield":2
     },
 
@@ -24,7 +24,7 @@ ENEMY_TYPES={
         "image":"assets/range1.png",
         "damaged_image":"assets/damaged_range1.png",
         "projectile_image":"assets/enemyprojectile1.png",
-        "xp_yield":100,
+        "xp_yield":80,
         "currency_yield":2
     }
 }
@@ -48,7 +48,7 @@ SHOP_ITEMS={
 
 DIFFICULTY={
     "Easy":{
-        "stats_multiplier":0.75,
+        "stats_multiplier":0.8,
         "speed_multiplier":0.9,
         "xp_multiplier":1.0
     },
@@ -58,12 +58,12 @@ DIFFICULTY={
         "xp_multiplier":1.0
     },
     "Hard":{
-        "stats_multiplier":1.25,
+        "stats_multiplier":1.2,
         "speed_multiplier":1.1,
         "xp_multiplier":1.5
     },
     "Hardcore":{
-        "stats_multiplier":1.5,
+        "stats_multiplier":1.4,
         "speed_multiplier":1.15,
         "xp_multiplier":2
     }

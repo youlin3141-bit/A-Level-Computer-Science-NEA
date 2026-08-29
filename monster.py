@@ -124,7 +124,7 @@ class Enemy:
         enemy_tile = (self.rect.centerx // settings.TILE_SIZE, self.rect.centery // settings.TILE_SIZE)
         if enemy_tile==self.last_seen:
             self.state="wander"
-            print("arrived at location!!")
+            # print("arrived at location!!")
             return
         self.path=astar(enemy_tile,self.last_seen,self.map)
         self.traverse_path(self.path)
@@ -165,6 +165,7 @@ class MeleeEnemy(Enemy):
     def attack(self,player):
         if self.cooldown<=0:
             if self.rect.colliderect(player.rect):
+                print("meleehit")
                 player.take_damage(self.damage)
                 self.cooldown=30
 
@@ -184,5 +185,5 @@ class RangeEnemy(Enemy):#
                 )
                 self.projectiles.append(projectile)
                 self.cooldown=60
-                print("enemyshoot")
+                # print("enemyshoot")
 
