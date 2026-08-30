@@ -160,8 +160,8 @@ def login(username,password):
         return None
 
 def create_player(username,password,confirm_password):
-    # if not 8<=len(password)<=20:
-    #     return False,"Password must be 8-20 characters long"
+    if not 8<=len(password)<=20:
+        return False,"Password must be 8-20 characters long"
     if not any(char.isupper() for char in password):
         return False,"Password must contain an uppercase letter"
     if not any(char.isdigit() for char in password):
