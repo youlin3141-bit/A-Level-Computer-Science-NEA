@@ -38,7 +38,7 @@ while menu.running:
             # menu.screens[4].set_worlds()
             if create_page.create_pressed:
                 difficulty=create_page.difficulty
-                print(f"{difficulty} difficulty world created")
+                # print(f"{difficulty} difficulty world created")
                 world_id=database.create_world(menu.screens[2].player_id)
                 game=Game(menu.screens[2].player_id,world_id, difficulty=difficulty)
                 database.save_game(game)

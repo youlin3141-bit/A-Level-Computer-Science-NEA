@@ -49,7 +49,7 @@ class Mace(Items):
         if self.cooldown>0:
             return False
         if self.cooldown<=0:
-            print(f"melee attack")
+            # print(f"melee attack")
             self.flash_timer=5
             for enemy in self.enemies:
                 if enemy.rect.colliderect(self.get_hitbox()):
@@ -73,7 +73,7 @@ class SpellBook(Items):
         if self.cooldown>0:
             return
         if self.cooldown<=0:
-            print(f"ranged attack")
+            # print(f"ranged attack")
             for x in range(-1, 2):
                 for y in range(-1, 2):
                     if x == 0 and y == 0:

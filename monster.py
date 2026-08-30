@@ -41,7 +41,7 @@ class Enemy:
         if self.immunity_frames<=0:
             self.health-=damage
             self.damage_flash_timer=10
-            print(f"enemy new health:{self.health}")
+            # print(f"enemy new health:{self.health}")
             if self.health<=0:
                 self.health=0
             self.immunity_frames=30
@@ -165,7 +165,7 @@ class MeleeEnemy(Enemy):
     def attack(self,player):
         if self.cooldown<=0:
             if self.rect.colliderect(player.rect):
-                print("meleehit")
+                # print("meleehit")
                 player.take_damage(self.damage)
                 self.cooldown=30
 

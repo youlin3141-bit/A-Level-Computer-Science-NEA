@@ -5,7 +5,7 @@ from progression import Progression
 import settings
 import database
 PLAYER_SIZE=48
-SPEED=10
+SPEED=5
 class Player:
     def __init__(self,x,y,game_map):
         self.x = x
@@ -22,7 +22,6 @@ class Player:
         self.score=0
         self.items=[None,None,None]
         self.item_index=0
-        self.lives=0 #changes depend on diffculty
         self.max_health=100
         self.current_item=self.items[0]
         self.health=self.max_health
@@ -219,9 +218,9 @@ class Player:
         if self.progression.levelled_up:
             self.upgrade=random.choice(self.upgrades)
             if self.upgrade=="Speed":
-                self.speed+=0.5
+                self.speed+=0.2
             if self.upgrade=="Damage":
-                self.damage_upgrade+=2
+                self.damage_upgrade+=1
             if self.upgrade=="Max Health":
                 self.max_health+=10
                 self.health+=10

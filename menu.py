@@ -1,3 +1,5 @@
+from email.contentmanager import set_text_content
+
 import pygame
 import pygame_gui
 import settings
@@ -78,9 +80,13 @@ class Leaderboard(Page):
     def handle_event(self, event):
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            if event.ui_element == self.slider:
-                print(f"NUmber 1 is ME")
+            # if event.ui_element == self.slider:
+                 # print(f"NUmber 1 is ME")
             if event.ui_element==self.refresh_button:
+                self.slider.kill()
+                self.slider = pygame_gui.elements.UIScrollingContainer(
+                    relative_rect=pygame.Rect((125, 200), (500, 300)),
+                    manager=self.manager)
                 self.load_leaderboard()
             if event.ui_element == self.back_button:
                 update_screen(0)
@@ -169,8 +175,8 @@ class RegisterPage(Page):
                     self.username_box.set_text("")
                     self.password_box.set_text("")
                     self.confirm_password_box.set_text("")
-                print(database.display_game())
-                print(database.display_players())
+                # print(database.display_game())
+                # print(database.display_players())
         self.manager.process_events(event)
 
 class ChooseWorld(Page):
@@ -268,12 +274,12 @@ class CreateNewWorld(Page):
             if event.ui_element == self.create_world:
                 self.difficulty=self.difficulty_select.selected_option
                 self.create_pressed=True
-                print(f"World created")
+                # print(f"World created")
             if event.ui_element == self.back_button:
                 update_screen(4)
-        if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
-            if event.ui_element == self.difficulty_select:
-                print(f"Difficulty set to: {event.text}")
+        # if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+        #     if event.ui_element == self.difficulty_select:
+        #         print(f"Difficulty set to: {event.text}")
 
 class PausePage(Page):
     def __init__(self):
@@ -340,7 +346,6 @@ class ShopPage(Page):
         self.selected_item=None
     def set_items(self,items):
         self.shop_items=items
-        # print(items)
         price2=settings.SHOP_ITEMS["upgrades"].get(self.shop_items[1])
         price3 = settings.SHOP_ITEMS["upgrades"].get(self.shop_items[2])
         if self.shop_items[0]in settings.SHOP_ITEMS["items"]:

@@ -23,7 +23,7 @@ class Progression:
 
     def level_up(self):
         if self.xp>=self.xp_required():
-            print("true")
+            # print("true")
             return True
         return False
 

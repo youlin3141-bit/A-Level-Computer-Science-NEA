@@ -95,7 +95,7 @@ class Game:
 
     def spawn_enemy(self):
         enemy_spawns=self.valid_spawns.copy()
-        print(self.valid_spawns)
+        # print(self.valid_spawns)
         number_enemies=int((4*self.level)**0.5+1)
         for i in range(number_enemies):#int((4*self.level)**0.5+1)
             if enemy_spawns:
@@ -126,7 +126,7 @@ class Game:
     def next_level(self):
         completed_level=self.level
         self.level+=1
-        print(f"New Level Reached:{self.level}")
+        # print(f"New Level Reached:{self.level}")
         if completed_level%3==0:
             self.shop_required=True
             self.generate_shop()
@@ -154,22 +154,23 @@ class Game:
         if item_name in settings.SHOP_ITEMS["items"]:
             item=None
             price=settings.SHOP_ITEMS["items"][item_name]
-            if self.player.progression.currency<price:
-                print("Not Enough Coins")
-            if item_name=="Mace":
-                self.has_mace = 1
-                item=items.Mace(self.player,self.enemies)
-            elif item_name=="SpellBook":
-                self.has_spellbook = 1
-                item=items.SpellBook(self.player,self.enemies,self.projectiles)
-            if item:
-                if self.player.add_item(item):
-                    if item_name=="Mace":
-                        self.has_mace=1
-                    elif item_name=="SpellBook":
-                        self.has_spellbook=1
-                        print(self.has_spellbook)
-                    self.player.progression.currency-=price
+            # if self.player.progression.currency<price:
+                # print("Not Enough Coins")
+            if self.player.progression.currency>=price:
+                if item_name=="Mace":
+                    self.has_mace = 1
+                    item=items.Mace(self.player,self.enemies)
+                elif item_name=="SpellBook":
+                    self.has_spellbook = 1
+                    item=items.SpellBook(self.player,self.enemies,self.projectiles)
+                if item:
+                    if self.player.add_item(item):
+                        if item_name=="Mace":
+                            self.has_mace=1
+                        elif item_name=="SpellBook":
+                            self.has_spellbook=1
+                            # print(self.has_spellbook)
+                        self.player.progression.currency-=price
         elif item_name in settings.SHOP_ITEMS["upgrades"]:
             price=settings.SHOP_ITEMS["upgrades"][item_name]
             if self.player.progression.currency>=price:

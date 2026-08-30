@@ -47,7 +47,7 @@ def create_database():
                     FOREIGN KEY (player_id) REFERENCES players(player_id)
     )""")
 
-    cursor.execute("PRAGMA table_info(players)")
+    # cursor.execute("PRAGMA table_info(players)")
     print(cursor.fetchall())
     connection.commit()
     connection.close()
