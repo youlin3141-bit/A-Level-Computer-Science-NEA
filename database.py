@@ -13,8 +13,11 @@ def get_highest_level(player_id):
     cursor=connection.cursor()
     cursor.execute("""SELECT highest_level FROM players WHERE player_id=?""",(player_id,))
     data=cursor.fetchone()
+    if not data:
+        return 0
     cursor.close()
-    return data
+    connection.close()
+    return data[0]
 def create_database():
     connection=connect()
     cursor=connection.cursor()
@@ -115,6 +118,14 @@ def load_all_games(player_id):
     data=cursor.fetchall()
     cursor.close()
     return data
+def get_leaderboard():
+    connection=connect()
+    cursor=connection.cursor()
+    cursor.execute("""SELECT username, highest_level FROM players ORDER BY highest_level DESC limit 50""")
+    data=cursor.fetchall()
+    cursor.close()
+    return data
+
 def count_games(player_id):
     connection=connect()
     cursor=connection.cursor()
@@ -150,13 +161,13 @@ def login(username,password):
 
 def create_player(username,password,confirm_password):
     # if not 8<=len(password)<=20:
-    #     return "Password must be 8-20 characters long"
+    #     return False,"Password must be 8-20 characters long"
     if not any(char.isupper() for char in password):
-        return "Password must contain an uppercase letter"
+        return False,"Password must contain an uppercase letter"
     if not any(char.isdigit() for char in password):
-        return "Password must contain a number"
+        return False,"Password must contain a number"
     if password!=confirm_password:
-        return "Passwords do not match"
+        return False,"Passwords do not match"
     connection=connect()
     cursor=connection.cursor()
     try:
@@ -165,9 +176,9 @@ def create_player(username,password,confirm_password):
                     VALUES(?,?)""",
         (username,password))
         connection.commit()
-        return cursor.lastrowid
+        return True,"Account Created"
     except sqlite3.IntegrityError:
-        return "Username already exists"
+        return False,"Username already exists"
     finally:
         connection.close()
 
@@ -220,3 +231,33 @@ def highest_level(game):
                     WHERE player_id=? and highest_level<?""",(game.level,game.player_id,game.level))
     connection.commit()
     connection.close()
+def test_leaderboard():
+    connection=connect()
+    cursor=connection.cursor()
+    cursor.executemany("""
+        INSERT INTO players (username, highest_level, password)
+        VALUES (?, ?, ?)
+    """, [
+        ("Player1", 1, "password"),
+        ("Player2", 5, "password"),
+        ("Player3", 10, "password"),
+        ("Player4", 3, "password"),
+        ("Player5", 15, "password"),
+        ("Player6", 8, "password"),
+        ("Player7", 12, "password"),
+        ("Player8", 2, "password"),
+        ("Player9", 20, "password"),
+        ("Player10", 7, "password"),
+        ("Player11", 14, "password"),
+        ("Player12", 6, "password"),
+        ("Player13", 18, "password"),
+        ("Player14", 4, "password"),
+        ("Player15", 11, "password"),
+        ("Player16", 9, "password"),
+        ("Player17", 16, "password"),
+        ("Player18", 13, "password"),
+        ("Player19", 19, "password"),
+        ("Player20", 17, "password")
+    ])
+    connection.commit()
+    cursor.close()

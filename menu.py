@@ -14,7 +14,7 @@ class Page:
             manager=self.manager,
         )
         self.page_label = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((350, 200), (100, 50)),
+            relative_rect=pygame.Rect((350, 150), (100, 50)),
             text="",
             manager=self.manager,
         )
@@ -45,10 +45,9 @@ class MainMenu(Page):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element ==self.play_button:
                 update_screen(2)
+                # database.test_leaderboard()
             if event.ui_element ==self.leaderboard_button:
                 update_screen(1)
-            # if event.ui_element ==self.test_button:
-            #     start_game = True
             if event.ui_element ==self.back_button:#
                 running=False
         self.manager.process_events(event)
@@ -56,16 +55,33 @@ class MainMenu(Page):
 class Leaderboard(Page):
     def __init__(self):
         super().__init__()
-        self.slider = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((300, 300), (200, 50)),
-                                                        # rectangle shape
-                                                        text='Work In Progress',
+        self.slider = pygame_gui.elements.UIScrollingContainer(relative_rect=pygame.Rect((125, 200), (500, 300)),
                                                         manager=self.manager)
+        self.refresh_button=pygame_gui.elements.UIButton(relative_rect=pygame.Rect((500,150),(100,50)),
+                                                         text="Refresh",
+                                                         manager=self.manager
+                                                         )
         self.page_label.set_text("Leaderboard")
+        self.load_leaderboard()
+    def load_leaderboard(self):
+        data=database.get_leaderboard()
+        for i,(username,level) in enumerate(data):
+            pygame_gui.elements.UILabel(
+                relative_rect=pygame.Rect((20,i*50),(500,40)),
+                text=f"{i+1}. {username}     Highest Level Reached: {level}",
+                manager=self.manager,
+                container=self.slider
+            )
+            number_of_entries=i
+        if data:
+            self.slider.set_scrollable_area_dimensions((450,number_of_entries*50+50))
     def handle_event(self, event):
-        
+
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.slider:
                 print(f"NUmber 1 is ME")
+            if event.ui_element==self.refresh_button:
+                self.load_leaderboard()
             if event.ui_element == self.back_button:
                 update_screen(0)
         self.manager.process_events(event)
@@ -132,6 +148,11 @@ class RegisterPage(Page):
             placeholder_text="Create Password",
             manager=self.manager
         )
+        self.status_label=pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((250,400),(350,50)),
+            text="Create an Account",
+            manager=self.manager
+        )
         self.password_box.set_text_hidden(True)
         self.confirm_password_box.set_text_hidden(True)
     def handle_event(self, event):
@@ -142,10 +163,14 @@ class RegisterPage(Page):
                 username=self.username_box.get_text()
                 password=self.password_box.get_text()
                 confirm_password=self.confirm_password_box.get_text()
-                database.create_player(username, password, confirm_password)
-                data= database.display_players()
+                status=database.create_player(username, password, confirm_password)
+                self.status_label.set_text(status[1])
+                if status[0]:
+                    self.username_box.set_text("")
+                    self.password_box.set_text("")
+                    self.confirm_password_box.set_text("")
                 print(database.display_game())
-                print(data)
+                print(database.display_players())
         self.manager.process_events(event)
 
 class ChooseWorld(Page):
@@ -197,12 +222,11 @@ class ChooseWorld(Page):
         for i in range(database.count_games(self.player_id)):
             self.worlds.append(f"Save {i+1} - LVL {data[i][4]} - {data[i][1]}")
         self.world_save_select.kill()
+        self.record_current_account.set_text(f"Highest Level: {database.get_highest_level(self.player_id)}")
         if self.worlds:
             options=self.worlds
-            self.record_current_account.set_text(f"Highest Level: {database.get_highest_level(self.player_id)}")
         else:
             options=["Empty"]
-            self.record_current_account.set_text(f"Highest Level: None")
         self.world_save_select = pygame_gui.elements.UIDropDownMenu(
             relative_rect=pygame.Rect((220, 400), (230, 50)),
             options_list=options,

@@ -49,10 +49,12 @@ while menu.running:
             if game.paused:
                 menu.screens[6].handle_event(event)
                 game.paused = menu.screens[6].paused
-                # if not menu.screens[6].game_active:
-                #     database.save_game(game)
-                #     game = None
-                #     menu.screens[4].set_worlds()
+                if not menu.screens[6].game_active:
+                    database.save_game(game)
+                    game = None
+                    menu.active_screen = menu.screens[4]
+                    menu.screens[4].set_worlds()
+                    menu.screens[6].game_active=True
             elif game.shop_required:
                 shop=menu.screens[7]
                 shop.handle_event(event)
